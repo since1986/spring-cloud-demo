@@ -1,0 +1,95 @@
+spring:
+  application:
+    name: comgithubsince1986demoprofile
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .jsp
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/profile?useUnicode=true&characterEncoding=UTF-8
+    driver-class-name: com.mysql.jdbc.Driver
+    dbcp2:
+      initial-size: 3
+
+server:
+  port: 8003
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8001/eureka/
+
+app:
+  defaultCharacterEncoding: utf-8
+
+  cors:
+    mapping: /**
+    allowedOrigins:
+      - http://localhost:63342
+      - http://localhost:63343
+      - http://localhost:63344
+    allowedMethods:
+      - OPTIONS
+      - HEAD
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    allowedHeaders:
+      - Authorization
+      - Cache-Control
+      - Content-Type
+    allowCredentials: true
+
+---
+spring:
+  profiles: production
+  application:
+    name: comgithubsince1986demoprofile
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .jsp
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/profile?useUnicode=true&characterEncoding=UTF-8
+    driver-class-name: com.mysql.jdbc.Driver
+    dbcp2:
+      initial-size: 3
+
+server:
+  port: 9003
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:9001/eureka/
+
+app:
+  defaultCharacterEncoding: utf-8
+
+  cors:
+    mapping: /**
+    allowedOrigins:
+      - http://localhost:63342
+      - http://localhost:63343
+      - http://localhost:63344
+    allowedMethods:
+      - OPTIONS
+      - HEAD
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    allowedHeaders:
+      - Authorization
+      - Cache-Control
+      - Content-Type
+    allowCredentials: true

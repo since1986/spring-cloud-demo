@@ -1,0 +1,133 @@
+spring:
+  application:
+    name: comgithubsince1986demogateway
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .jsp
+
+server:
+  port: 8002
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8001/eureka/
+
+zuul:
+  routes:
+    profile:
+      path: /private/profile/**
+      serviceId: comgithubsince1986demoprofile
+
+app:
+  defaultCharacterEncoding: utf-8
+
+  dataSource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/gateway?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
+
+  cors:
+    mapping: /**
+    allowedOrigins:
+      - http://localhost:63342
+      - http://localhost:63343
+      - http://localhost:63344
+    allowedMethods:
+      - OPTIONS
+      - HEAD
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    allowedHeaders:
+      - Authorization
+      - Cache-Control
+      - Content-Type
+    allowCredentials: true
+
+  security:
+    publicWeb:
+      antMatcher: /public/**
+    privateWeb:
+      antMatcher: /private/**
+      loginProcessingUrl: /login
+      logoutUrl: /logout
+    systemWeb:
+      antMatcher: /system/**
+      systemUsername: system
+      systemPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+      developerUsername: developer
+      developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+
+---
+spring:
+  profiles: production
+  application:
+    name: comgithubsince1986demogateway
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .jsp
+
+server:
+  port: 9002
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:9001/eureka/
+
+zuul:
+  routes:
+    profile:
+      path: /private/profile/**
+      serviceId: comgithubsince1986demoprofile
+
+app:
+  defaultCharacterEncoding: utf-8
+
+  dataSource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/gateway?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
+
+  cors:
+    mapping: /**
+    allowedOrigins:
+      - http://localhost:63342
+      - http://localhost:63343
+      - http://localhost:63344
+    allowedMethods:
+      - OPTIONS
+      - HEAD
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    allowedHeaders:
+      - Authorization
+      - Cache-Control
+      - Content-Type
+    allowCredentials: true
+
+  security:
+    publicWeb:
+      antMatcher: /public/**
+    privateWeb:
+      antMatcher: /private/**
+      loginProcessingUrl: /login
+      logoutUrl: /logout
+    systemWeb:
+      antMatcher: /system/**
+      systemUsername: system
+      systemPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+      developerUsername: developer
+      developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
