@@ -1,6 +1,8 @@
 package com.github.since1986.demo.gateway;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -47,10 +49,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER - 998)
@@ -139,6 +138,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @Value("${security.oauth2.resource.jwt.key-value}")
         private String jwtSignerKey;
 
+        @Value("${spring.application.name}")
+        private static String appName;
+
         private final AppProperties appProperties;
         private final DataSource dataSource;
         private final PasswordEncoder passwordEncoder;
@@ -162,7 +164,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         private RequestHeaderAuthenticationFilter jwtRequestHeaderAuthenticationFilter() throws Exception {
             RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter = new RequestHeaderAuthenticationFilter();
-            requestHeaderAuthenticationFilter.setPrincipalRequestHeader("access_token");
+            requestHeaderAuthenticationFilter.setPrincipalRequestHeader("Authorization");
             requestHeaderAuthenticationFilter.setExceptionIfHeaderMissing(false);
             requestHeaderAuthenticationFilter.setAuthenticationManager(super.authenticationManager());
             return requestHeaderAuthenticationFilter;
@@ -172,34 +174,82 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             return new MacSigner(jwtSignerKey);
         }
 
-        static class JwtUserDetailPayload {
+        public static class JwtUserDetailPayload {
 
-            private String username;
-            private Date expirationTime = new Date();
-            private List<String> authorities = new ArrayList<>();
+            //JWT标准字段 https://tools.ietf.org/html/rfc7519#section-4.1 https://en.wikipedia.org/wiki/JSON_Web_Token#Standard_field
+            private String iss = appName;    //Issuer
+            private String sub = "authorization";    //Subject
+            private String aud;    //Audience
+            private long exp = DateUtils.addMonths(new Date(), 6).getTime();    //Expiration
+            private long nbf = new Date().getTime();    //Not Before
+            private long iat = System.currentTimeMillis();    //Issued At
+            private String jti = StringUtils.removeAll(UUID.randomUUID().toString(), "-");    //JWT ID
 
-            public String getUsername() {
-                return username;
+            //自定义字段
+            private List<String> scopes = new ArrayList<>(); //授权
+
+            public void setIss(String iss) {
+                this.iss = iss;
             }
 
-            public void setUsername(String username) {
-                this.username = username;
+            public String getIss() {
+                return iss;
             }
 
-            public Date getExpirationTime() {
-                return expirationTime;
+            public String getSub() {
+                return sub;
             }
 
-            public void setExpirationTime(Date expirationTime) {
-                this.expirationTime = expirationTime;
+            public void setSub(String sub) {
+                this.sub = sub;
             }
 
-            public List<String> getAuthorities() {
-                return authorities;
+            public String getAud() {
+                return aud;
             }
 
-            public void setAuthorities(List<String> authorities) {
-                this.authorities = authorities;
+            public void setAud(String aud) {
+                this.aud = aud;
+            }
+
+            public long getExp() {
+                return exp;
+            }
+
+            public void setExp(long exp) {
+                this.exp = exp;
+            }
+
+            public long getNbf() {
+                return nbf;
+            }
+
+            public void setNbf(long nbf) {
+                this.nbf = nbf;
+            }
+
+            public long getIat() {
+                return iat;
+            }
+
+            public void setIat(long iat) {
+                this.iat = iat;
+            }
+
+            public String getJti() {
+                return jti;
+            }
+
+            public void setJti(String jti) {
+                this.jti = jti;
+            }
+
+            public List<String> getScopes() {
+                return scopes;
+            }
+
+            public void setScopes(List<String> scopes) {
+                this.scopes = scopes;
             }
         }
 
@@ -242,15 +292,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         public Authentication authenticate(Authentication authentication) throws AuthenticationException {
                             if (authentication.getClass().isAssignableFrom(PreAuthenticatedAuthenticationToken.class) && authentication.getPrincipal() != null) {
                                 String jwtHeader = (String) authentication.getPrincipal();
-                                Jwt jwt = JwtHelper.decodeAndVerify(jwtHeader, jwtSignatureVerifier());
+                                if (!StringUtils.startsWith(jwtHeader, "Bearer ")) {
+                                    throw new RuntimeException(String.format("Jwt authorization header must start with %s.", "\"Bearer \"") );
+                                }
+                                Jwt jwt = JwtHelper.decodeAndVerify(StringUtils.removeStart(jwtHeader, "Bearer "), jwtSignatureVerifier());
                                 JwtUserDetailPayload payload = new JwtUserDetailPayload();
                                 try {
                                     payload = objectMapper.readValue(jwt.getClaims(), JwtUserDetailPayload.class);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                List<GrantedAuthority> authorities = payload.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-                                return new JsonWebToken(new User(payload.getUsername(), "*PROTECTED*", authorities));
+                                List<GrantedAuthority> authorities = payload.getScopes().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+                                return new JsonWebToken(new User(payload.getAud(), "*PROTECTED*", authorities));
                             }
                             return authentication;
                         }
