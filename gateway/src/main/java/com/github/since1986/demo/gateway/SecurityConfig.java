@@ -138,9 +138,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @Value("${security.oauth2.resource.jwt.key-value}")
         private String jwtSignerKey;
 
-        @Value("${spring.application.name}")
-        private static String appName;
-
         private final AppProperties appProperties;
         private final DataSource dataSource;
         private final PasswordEncoder passwordEncoder;
@@ -177,7 +174,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         public static class JwtUserDetailPayload {
 
             //JWT标准字段 https://tools.ietf.org/html/rfc7519#section-4.1 https://en.wikipedia.org/wiki/JSON_Web_Token#Standard_field
-            private String iss = appName;    //Issuer
+            private String iss = "system";    //Issuer
             private String sub = "authorization";    //Subject
             private String aud;    //Audience
             private long exp = DateUtils.addMonths(new Date(), 6).getTime();    //Expiration
@@ -292,15 +289,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         public Authentication authenticate(Authentication authentication) throws AuthenticationException {
                             if (authentication.getClass().isAssignableFrom(PreAuthenticatedAuthenticationToken.class) && authentication.getPrincipal() != null) {
                                 String jwtHeader = (String) authentication.getPrincipal();
-                                if (!StringUtils.startsWith(jwtHeader, "Bearer ")) {
-                                    throw new RuntimeException(String.format("Jwt authorization header must start with %s.", "\"Bearer \"") );
+                                if (!StringUtils.startsWith(StringUtils.removeStart(jwtHeader, " "), "Bearer ")) {
+                                    throw new RuntimeException(String.format("Jwt authorization header must start with %s.", "\" Bearer \""));
                                 }
                                 Jwt jwt = JwtHelper.decodeAndVerify(StringUtils.removeStart(jwtHeader, "Bearer "), jwtSignatureVerifier());
-                                JwtUserDetailPayload payload = new JwtUserDetailPayload();
+                                JwtUserDetailPayload payload;
                                 try {
                                     payload = objectMapper.readValue(jwt.getClaims(), JwtUserDetailPayload.class);
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+                                    throw new RuntimeException(e);
                                 }
                                 List<GrantedAuthority> authorities = payload.getScopes().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
                                 return new JsonWebToken(new User(payload.getAud(), "*PROTECTED*", authorities));
