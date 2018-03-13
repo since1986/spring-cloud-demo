@@ -12,10 +12,10 @@ import java.util.Collections;
 public class JwtUtils {
 
     public static Jwt genATestJwt() throws JsonProcessingException {
-        SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtUserDetailPayload jwtUserDetailPayload = new SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtUserDetailPayload();
-        jwtUserDetailPayload.setAud("testUser");
-        jwtUserDetailPayload.setScopes(Collections.singletonList("ROLE_USER"));
-        return JwtHelper.encode(new ObjectMapper().writeValueAsString(jwtUserDetailPayload), new MacSigner("123456"));
+        SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtPayload jwtPayload = new SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtPayload();
+        jwtPayload.setUsername("test");
+        jwtPayload.setAuthorities(Collections.singletonList("ROLE_USER"));
+        return JwtHelper.encode(new ObjectMapper().writeValueAsString(jwtPayload), new MacSigner("123456"));
     }
 
     public static void main(String[] args) throws JsonProcessingException {

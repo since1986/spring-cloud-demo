@@ -13,19 +13,17 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
@@ -34,22 +32,27 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
-import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER - 998)
@@ -152,26 +155,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         }
 
         @Bean
-        public UserDetailsService jdbcUserDetailsService() {
+        public UserDetailsService userDetailsService() {
             JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
             jdbcDao.setEnableGroups(true);
             jdbcDao.setDataSource(dataSource);
             return jdbcDao;
         }
 
-        private RequestHeaderAuthenticationFilter jwtRequestHeaderAuthenticationFilter() throws Exception {
-            RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter = new RequestHeaderAuthenticationFilter();
-            requestHeaderAuthenticationFilter.setPrincipalRequestHeader("Authorization");
-            requestHeaderAuthenticationFilter.setExceptionIfHeaderMissing(false);
-            requestHeaderAuthenticationFilter.setAuthenticationManager(super.authenticationManager());
-            return requestHeaderAuthenticationFilter;
-        }
-
-        private SignatureVerifier jwtSignatureVerifier() {
+        private MacSigner jwtSigner() {
             return new MacSigner(jwtSignerKey);
         }
 
-        public static class JwtUserDetailPayload {
+        public static class JwtPayload {
 
             //JWT标准字段 https://tools.ietf.org/html/rfc7519#section-4.1 https://en.wikipedia.org/wiki/JSON_Web_Token#Standard_field
             private String iss = "system";    //Issuer
@@ -183,7 +178,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             private String jti = StringUtils.removeAll(UUID.randomUUID().toString(), "-");    //JWT ID
 
             //自定义字段
-            private List<String> scopes = new ArrayList<>(); //授权
+            private String username;
+            private String userId;
+            private List<String> authorities = new ArrayList<>(); //授权
 
             public void setIss(String iss) {
                 this.iss = iss;
@@ -241,85 +238,60 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 this.jti = jti;
             }
 
-            public List<String> getScopes() {
-                return scopes;
+            public String getUsername() {
+                return username;
             }
 
-            public void setScopes(List<String> scopes) {
-                this.scopes = scopes;
+            public void setUsername(String username) {
+                this.username = username;
+            }
+
+            public String getUserId() {
+                return userId;
+            }
+
+            public void setUserId(String userId) {
+                this.userId = userId;
+            }
+
+            public List<String> getAuthorities() {
+                return authorities;
+            }
+
+            public void setAuthorities(List<String> authorities) {
+                this.authorities = authorities;
             }
         }
 
         @Override
-        protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) {
+        protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
             authenticationManagerBuilder
-                    .authenticationProvider(new AuthenticationProvider() {
-
-                        class JsonWebToken extends AbstractAuthenticationToken {
-
-                            private User principal;
-
-                            /**
-                             * Creates a token with the supplied array of authorities.
-                             *
-                             * @param authorities the collection of <tt>GrantedAuthority</tt>s for the principal
-                             *                    represented by this authentication object.
-                             */
-                            public JsonWebToken(Collection<? extends GrantedAuthority> authorities) {
-                                super(authorities);
-                            }
-
-                            public JsonWebToken(User principal) {
-                                super(principal.getAuthorities());
-                                this.principal = principal;
-                            }
-
-                            @Override
-                            public Object getCredentials() {
-                                return this.principal.getPassword();
-                            }
-
-                            @Override
-                            public Object getPrincipal() {
-                                return this.principal;
-                            }
-                        }
-
-                        @Override
-                        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-                            if (authentication.getClass().isAssignableFrom(PreAuthenticatedAuthenticationToken.class) && authentication.getPrincipal() != null) {
-                                String jwtHeader = (String) authentication.getPrincipal();
-                                if (!StringUtils.startsWith(StringUtils.removeStart(jwtHeader, " "), "Bearer ")) {
-                                    throw new RuntimeException(String.format("Jwt authorization header must start with %s.", "\" Bearer \""));
-                                }
-                                Jwt jwt = JwtHelper.decodeAndVerify(StringUtils.removeStart(jwtHeader, "Bearer "), jwtSignatureVerifier());
-                                JwtUserDetailPayload payload;
-                                try {
-                                    payload = objectMapper.readValue(jwt.getClaims(), JwtUserDetailPayload.class);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                List<GrantedAuthority> authorities = payload.getScopes().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-                                return new JsonWebToken(new User(payload.getAud(), "*PROTECTED*", authorities));
-                            }
-                            return authentication;
-                        }
-
-                        @Override
-                        public boolean supports(Class<?> authentication) {
-                            return authentication.isAssignableFrom(PreAuthenticatedAuthenticationToken.class) || authentication.isAssignableFrom(JsonWebToken.class);
-                        }
-                    });
+                    .userDetailsService(userDetailsService())
+                    .passwordEncoder(passwordEncoder);
         }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
-                    .addFilterBefore(jwtRequestHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                    .addFilterBefore(new OncePerRequestFilter() {
+
+                        @Override
+                        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+                            String jwtHeader = request.getHeader("Authorization");
+                            if (StringUtils.isNoneEmpty(jwtHeader) && StringUtils.startsWith(jwtHeader, "Bearer ")) {
+                                Jwt jwt = JwtHelper.decodeAndVerify(StringUtils.removeStart(jwtHeader, "Bearer "), jwtSigner());
+                                JwtPayload jwtPayload = objectMapper.readValue(jwt.getClaims(), JwtPayload.class);
+                                List<GrantedAuthority> authorities = jwtPayload.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+                                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(jwtPayload.getUsername(), "*PROTECTED*", authorities));
+                            }
+                            //TODO Jwt过期校验
+                            filterChain.doFilter(request, response);
+                        }
+                    }, UsernamePasswordAuthenticationFilter.class); //检查Jwt header 是否存在，解析Jwt为UsernamePasswordAuthenticationToken后放入SecurityContext
             http
                     .antMatcher(appProperties.getSecurity().getPrivateWeb().getAntMatcher())
                     .csrf().disable()
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .cors()
 
                     .and()
                     .exceptionHandling()
@@ -329,6 +301,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .formLogin().loginProcessingUrl(appProperties.getSecurity().getPrivateWeb().getLoginProcessingUrl()).permitAll()
                     .successHandler((request, response, authentication) -> { //认证成功
+                        JwtPayload jwtPayload = new JwtPayload(); //认证成功后将Jwt放入response的header中
+                        jwtPayload.setUsername(authentication.getPrincipal().toString());
+                        jwtPayload.setAuthorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+                        Jwt jwt = JwtHelper.encode(objectMapper.writeValueAsString(jwtPayload), jwtSigner());
+                        response.addHeader("Authorization", String.format("Bearer %s", jwt.getEncoded()));
                         objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
                     })
                     .failureHandler((request, response, exception) -> { //认证失败
@@ -337,11 +314,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .logout()
                     .logoutUrl(appProperties.getSecurity().getPrivateWeb().getLogoutUrl())
-                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()).permitAll()
+                    .logoutSuccessHandler((request, response, authentication) -> {
+                        response.addHeader("Authorization", "Bearer "); //退出登录后清除掉Jwt header中的信息
+                    }).permitAll()
 
                     .and()
                     .authorizeRequests()
                     .expressionHandler(webSecurityExpressionHandler())
+                    .antMatchers(HttpMethod.OPTIONS).permitAll()
                     .anyRequest().access("hasRole('ROLE_USER')")
                     .and()
                     .exceptionHandling()
