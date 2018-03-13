@@ -156,96 +156,53 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             return jdbcDao;
         }
 
-        private RequestHeaderAuthenticationFilter jwtRequestHeaderAuthenticationFilter() {
+        private RequestHeaderAuthenticationFilter jwtRequestHeaderAuthenticationFilter() throws Exception {
             RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter = new RequestHeaderAuthenticationFilter();
-            requestHeaderAuthenticationFilter.setPrincipalRequestHeader("Authorization");
+            requestHeaderAuthenticationFilter.setPrincipalRequestHeader("access_token");
+            requestHeaderAuthenticationFilter.setExceptionIfHeaderMissing(false);
+            requestHeaderAuthenticationFilter.setAuthenticationManager(super.authenticationManager());
             return requestHeaderAuthenticationFilter;
         }
 
-        private SignatureVerifier signatureVerifier() {
+        private SignatureVerifier jwtSignatureVerifier() {
             return new MacSigner("123456");
         }
 
-        @Autowired
-        public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-            authenticationManagerBuilder
-                    .userDetailsService(jdbcUserDetailsService()).passwordEncoder(passwordEncoder);
+        static class JwtUserDetailPayload {
+
+            private String username;
+            private Date expirationTime = new Date();
+            private List<String> authorities = new ArrayList<>();
+
+            public String getUsername() {
+                return username;
+            }
+
+            public void setUsername(String username) {
+                this.username = username;
+            }
+
+            public Date getExpirationTime() {
+                return expirationTime;
+            }
+
+            public void setExpirationTime(Date expirationTime) {
+                this.expirationTime = expirationTime;
+            }
+
+            public List<String> getAuthorities() {
+                return authorities;
+            }
+
+            public void setAuthorities(List<String> authorities) {
+                this.authorities = authorities;
+            }
         }
 
         @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http
-                    .antMatcher(appProperties.getSecurity().getPrivateWeb().getAntMatcher())
-                    .csrf().disable()
-                    .cors()
-                    .and()
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-                    .and()
-                    .exceptionHandling()
-                    .authenticationEntryPoint((request, response, authException) -> { //认证入口点
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());
-                    })
-                    .and()
-                    .formLogin().loginProcessingUrl(appProperties.getSecurity().getPrivateWeb().getLoginProcessingUrl()).permitAll()
-                    .successHandler((request, response, authentication) -> { //认证成功
-                        objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
-                    })
-                    .failureHandler((request, response, exception) -> { //认证失败
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getLocalizedMessage());
-                    })
-                    .and()
-                    .logout()
-                    .logoutUrl(appProperties.getSecurity().getPrivateWeb().getLogoutUrl())
-                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()).permitAll()
-
-                    .and()
-                    .authorizeRequests()
-                    .expressionHandler(webSecurityExpressionHandler())
-                    .antMatchers(HttpMethod.OPTIONS).permitAll()
-                    .anyRequest().access("hasRole('ROLE_USER')")
-                    .and()
-                    .exceptionHandling()
-                    .accessDeniedHandler((request, response, accessDeniedException) -> { //AccessDeniedHandler只对已经通过认证的用户（也就是已经登陆成功）的用户生效
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    });
-
-            http
-                    .addFilterBefore(jwtRequestHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-            http
+        protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) {
+            authenticationManagerBuilder
                     .authenticationProvider(new AuthenticationProvider() {
-
-                        class Payload {
-
-                            private String username;
-                            private Date expirationTime = new Date();
-                            private List<String> authorities = new ArrayList<>();
-
-                            public String getUsername() {
-                                return username;
-                            }
-
-                            public void setUsername(String username) {
-                                this.username = username;
-                            }
-
-                            public Date getExpirationTime() {
-                                return expirationTime;
-                            }
-
-                            public void setExpirationTime(Date expirationTime) {
-                                this.expirationTime = expirationTime;
-                            }
-
-                            public List<String> getAuthorities() {
-                                return authorities;
-                            }
-
-                            public void setAuthorities(List<String> authorities) {
-                                this.authorities = authorities;
-                            }
-                        }
 
                         class JsonWebToken extends AbstractAuthenticationToken {
 
@@ -280,11 +237,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         @Override
                         public Authentication authenticate(Authentication authentication) throws AuthenticationException {
                             if (authentication.getClass().isAssignableFrom(PreAuthenticatedAuthenticationToken.class) && authentication.getPrincipal() != null) {
-                                String jwtTokenHeader = (String) authentication.getPrincipal();
-                                Jwt jwt = JwtHelper.decodeAndVerify(jwtTokenHeader, signatureVerifier());
-                                Payload payload = new Payload();
+                                String jwtHeader = (String) authentication.getPrincipal();
+                                Jwt jwt = JwtHelper.decodeAndVerify(jwtHeader, jwtSignatureVerifier());
+                                JwtUserDetailPayload payload = new JwtUserDetailPayload();
                                 try {
-                                    payload = objectMapper.readValue(jwt.getClaims(), Payload.class);
+                                    payload = objectMapper.readValue(jwt.getClaims(), JwtUserDetailPayload.class);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -298,6 +255,47 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         public boolean supports(Class<?> authentication) {
                             return authentication.isAssignableFrom(PreAuthenticatedAuthenticationToken.class) || authentication.isAssignableFrom(JsonWebToken.class);
                         }
+                    });
+        }
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                    .addFilterBefore(jwtRequestHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+            http
+                    .antMatcher(appProperties.getSecurity().getPrivateWeb().getAntMatcher())
+                    .csrf().disable()
+                    .cors()
+                    .and()
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+                    .and()
+                    .exceptionHandling()
+                    .authenticationEntryPoint((request, response, authException) -> { //认证入口点
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());
+                    })
+                    .and()
+                    .formLogin().loginProcessingUrl(appProperties.getSecurity().getPrivateWeb().getLoginProcessingUrl()).permitAll()
+                    .successHandler((request, response, authentication) -> { //认证成功
+                        objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
+                    })
+                    .failureHandler((request, response, exception) -> { //认证失败
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getLocalizedMessage());
+                    })
+                    .and()
+                    .logout()
+                    .logoutUrl(appProperties.getSecurity().getPrivateWeb().getLogoutUrl())
+                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()).permitAll()
+
+                    .and()
+                    .authorizeRequests()
+                    .expressionHandler(webSecurityExpressionHandler())
+                    .antMatchers(HttpMethod.OPTIONS).permitAll()
+                    .anyRequest().access("hasRole('ROLE_USER')")
+                    .and()
+                    .exceptionHandling()
+                    .accessDeniedHandler((request, response, accessDeniedException) -> { //AccessDeniedHandler只对已经通过认证的用户（也就是已经登陆成功）的用户生效
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     });
         }
     }

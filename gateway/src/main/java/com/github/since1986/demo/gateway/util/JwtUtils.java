@@ -22,6 +22,6 @@ public class JwtUtils {
     }
 
     public static void main(String[] args) throws JsonProcessingException {
-        System.out.println(genATestJwt().getClaims());
+        System.out.println(genATestJwt().getEncoded());
     }
 }
