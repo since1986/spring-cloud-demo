@@ -21,6 +21,7 @@ zuul:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
 
+
 app:
   defaultCharacterEncoding: utf-8
 
@@ -59,10 +60,18 @@ app:
       logoutUrl: /logout
     systemWeb:
       antMatcher: /system/**
+      loginProcessingUrl: /system/login
+      logoutUrl: /system/logout
       systemUsername: system
       systemPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
       developerUsername: developer
       developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: 123456
 
 ---
 spring:
@@ -127,7 +136,15 @@ app:
       logoutUrl: /logout
     systemWeb:
       antMatcher: /system/**
+      loginProcessingUrl: /system/login
+      logoutUrl: /system/logout
       systemUsername: system
       systemPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
       developerUsername: developer
       developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: 123456

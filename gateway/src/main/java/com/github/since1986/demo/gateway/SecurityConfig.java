@@ -2,6 +2,7 @@ package com.github.since1986.demo.gateway;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -135,6 +136,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Configuration
     public static class PrivateWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
+        @Value("${security.oauth2.resource.jwt.key-value}")
+        private String jwtSignerKey;
+
         private final AppProperties appProperties;
         private final DataSource dataSource;
         private final PasswordEncoder passwordEncoder;
@@ -165,7 +169,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         }
 
         private SignatureVerifier jwtSignatureVerifier() {
-            return new MacSigner("123456");
+            return new MacSigner(jwtSignerKey);
         }
 
         static class JwtUserDetailPayload {
@@ -246,7 +250,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                     e.printStackTrace();
                                 }
                                 List<GrantedAuthority> authorities = payload.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-                                return new JsonWebToken(new User(payload.getUsername(), "[PROTECTED]", authorities));
+                                return new JsonWebToken(new User(payload.getUsername(), "*PROTECTED*", authorities));
                             }
                             return authentication;
                         }
@@ -265,8 +269,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             http
                     .antMatcher(appProperties.getSecurity().getPrivateWeb().getAntMatcher())
                     .csrf().disable()
-                    .cors()
-                    .and()
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                     .and()
@@ -290,7 +292,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .authorizeRequests()
                     .expressionHandler(webSecurityExpressionHandler())
-                    .antMatchers(HttpMethod.OPTIONS).permitAll()
                     .anyRequest().access("hasRole('ROLE_USER')")
                     .and()
                     .exceptionHandling()
@@ -307,11 +308,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         private final AppProperties appProperties;
         private final PasswordEncoder passwordEncoder;
+        private final ObjectMapper objectMapper;
 
         @Autowired
-        public SystemWebSecurityConfigurerAdapter(PasswordEncoder passwordEncoder, AppProperties appProperties) {
+        public SystemWebSecurityConfigurerAdapter(PasswordEncoder passwordEncoder, AppProperties appProperties, ObjectMapper objectMapper) {
             this.passwordEncoder = passwordEncoder;
             this.appProperties = appProperties;
+            this.objectMapper = objectMapper;
         }
 
         @Bean
@@ -347,12 +350,36 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .antMatcher(appProperties.getSecurity().getSystemWeb().getAntMatcher())
+                    .csrf().disable()
+                    .cors()
+
+                    .and()
+                    .exceptionHandling()
+                    .authenticationEntryPoint((request, response, authException) -> { //认证入口点
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());
+                    })
+                    .and()
+                    .formLogin().loginProcessingUrl(appProperties.getSecurity().getSystemWeb().getLoginProcessingUrl()).permitAll()
+                    .successHandler((request, response, authentication) -> { //认证成功
+                        objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
+                    })
+                    .failureHandler((request, response, exception) -> { //认证失败
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getLocalizedMessage());
+                    })
+                    .and()
+                    .logout()
+                    .logoutUrl(appProperties.getSecurity().getSystemWeb().getLogoutUrl())
+                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()).permitAll()
+                    .and()
                     .authorizeRequests()
                     .expressionHandler(webSecurityExpressionHandler())
-                    .anyRequest()
-                    .hasRole("SYSTEM")
+                    .antMatchers(HttpMethod.OPTIONS).permitAll()
+                    .anyRequest().access("hasRole('ROLE_SYSTEM')")
                     .and()
-                    .httpBasic();
+                    .exceptionHandling()
+                    .accessDeniedHandler((request, response, accessDeniedException) -> { //AccessDeniedHandler只对已经通过认证的用户（也就是已经登陆成功）的用户生效
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    });
         }
     }
 }

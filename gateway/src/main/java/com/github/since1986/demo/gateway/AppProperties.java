@@ -234,6 +234,8 @@ public class AppProperties {
         public static class SystemWeb {
 
             private String antMatcher;
+            private String loginProcessingUrl;
+            private String logoutUrl;
             private String systemUsername;
             private String systemPassword;
             private String developerUsername;
@@ -245,6 +247,22 @@ public class AppProperties {
 
             public void setAntMatcher(String antMatcher) {
                 this.antMatcher = antMatcher;
+            }
+
+            public String getLoginProcessingUrl() {
+                return loginProcessingUrl;
+            }
+
+            public void setLoginProcessingUrl(String loginProcessingUrl) {
+                this.loginProcessingUrl = loginProcessingUrl;
+            }
+
+            public String getLogoutUrl() {
+                return logoutUrl;
+            }
+
+            public void setLogoutUrl(String logoutUrl) {
+                this.logoutUrl = logoutUrl;
             }
 
             public String getSystemUsername() {
