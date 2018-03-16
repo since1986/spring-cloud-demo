@@ -290,10 +290,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     }, UsernamePasswordAuthenticationFilter.class); //检查Jwt header 是否存在，解析Jwt为UsernamePasswordAuthenticationToken后放入SecurityContext
             http
                     .antMatcher(appProperties.getSecurity().getPrivateWeb().getAntMatcher())
+                    .httpBasic().disable()
                     .csrf().disable()
                     .cors()
-
                     .and()
+
                     .exceptionHandling()
                     .authenticationEntryPoint((request, response, authException) -> { //认证入口点
                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());

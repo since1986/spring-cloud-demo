@@ -80,7 +80,7 @@ security:
 logging:
   level:
     com.github.since1986.demo.gateway.mapper.AuthorityMapper: TRACE
-    com.github.since1986.demo.gateway.mapper.RemoteCallEventMapper: TRACE
+    com.github.since1986.demo.gateway.mapper.RemoteCallEventMapper: ERROR
     com.github.since1986.demo.gateway.mapper.UserMapper: TRACE
 
 ---
