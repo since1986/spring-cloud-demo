@@ -5,4 +5,6 @@ import com.github.since1986.demo.profile.model.Profile;
 public interface ProfileService {
 
     Profile get(long id);
+
+    void save(Profile profile);
 }

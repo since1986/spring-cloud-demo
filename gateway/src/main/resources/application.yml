@@ -6,6 +6,12 @@ spring:
     view:
       prefix: /view/
       suffix: .jsp
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: demo-group
+    producer:
+      acks: all #所有kafka节点全接受到才表示发送成功
 
 server:
   port: 8002
@@ -20,7 +26,6 @@ zuul:
     profile:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
-
 
 app:
   defaultCharacterEncoding: utf-8
@@ -83,6 +88,12 @@ spring:
     view:
       prefix: /view/
       suffix: .jsp
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: demo-group
+    producer:
+      acks: all #所有kafka节点全接受到才表示发送成功
 
 server:
   port: 9002

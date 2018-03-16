@@ -13,6 +13,12 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     dbcp2:
       initial-size: 3
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: demo-group
+    producer:
+      acks: all #所有kafka节点全接受到才表示发送成功
 
 server:
   port: 8003
@@ -62,6 +68,12 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     dbcp2:
       initial-size: 3
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: demo-group
+    producer:
+      acks: all #所有kafka节点全接受到才表示发送成功
 
 server:
   port: 9003

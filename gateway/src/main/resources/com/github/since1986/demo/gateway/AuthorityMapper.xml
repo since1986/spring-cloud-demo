@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.github.since1986.demo.gateway.mapper.AuthorityMapper">
+
+    <insert id="save" keyProperty="id" keyColumn="id">
+        insert into authorities values (#{authority.id}, #{authority.username}, #{authority.authority}, #{authority.userId})
+    </insert>
+    <resultMap id="Authority" type="com.github.since1986.demo.gateway.model.Authority">
+        <result property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="authority" column="authority"/>
+        <result property="userId" column="user"/>
+    </resultMap>
+</mapper>

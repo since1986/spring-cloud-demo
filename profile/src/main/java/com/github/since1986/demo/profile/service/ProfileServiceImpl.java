@@ -1,6 +1,8 @@
 package com.github.since1986.demo.profile.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.since1986.demo.profile.mapper.ProfileMapper;
+import com.github.since1986.demo.profile.mapper.RemoteCallEventMapper;
 import com.github.since1986.demo.profile.model.Profile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +16,27 @@ public class ProfileServiceImpl implements ProfileService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfileServiceImpl.class);
 
+    private final ProfileMapper profileMapper;
+
+    private final RemoteCallEventMapper remoteCallEventMapper;
+
+    private final ObjectMapper objectMapper;
+
     @Autowired
-    private ProfileMapper profileMapper;
+    public ProfileServiceImpl(ProfileMapper profileMapper, ObjectMapper objectMapper, RemoteCallEventMapper remoteCallEventMapper) {
+        this.profileMapper = profileMapper;
+        this.objectMapper = objectMapper;
+        this.remoteCallEventMapper = remoteCallEventMapper;
+    }
 
     @Override
     public Profile get(long id) {
-        LOGGER.info(id + "");
-        LOGGER.error("test");
-        LOGGER.info("test");
-        LOGGER.trace("test");
         return profileMapper.get(id);
+    }
+
+
+    @Override
+    public void save(Profile profile) {
+        profileMapper.save(profile);
     }
 }

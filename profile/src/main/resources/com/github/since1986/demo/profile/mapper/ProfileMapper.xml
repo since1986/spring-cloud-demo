@@ -4,6 +4,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.github.since1986.demo.profile.mapper.ProfileMapper">
+    <insert id="save">
+        insert into profile (`id`, `username`, `user_id`, `_name`, `gender`, `birthday`) values (#{profile.id}, #{profile.username}, #{profile.userId}, #{profile.name}, #{profile.gender}, #{profile.birthday})
+    </insert>
 
     <select id="get" resultMap="Profile">
         SELECT *

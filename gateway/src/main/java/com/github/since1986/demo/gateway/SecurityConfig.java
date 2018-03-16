@@ -84,7 +84,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         web
                 .ignoring()
-                .antMatchers("/favicon.ico", "/webjars/**", "/static/**");
+                .antMatchers("/favicon.ico", "/webjars/**", "/static/**", "/register/**");
     }
 
     @Bean

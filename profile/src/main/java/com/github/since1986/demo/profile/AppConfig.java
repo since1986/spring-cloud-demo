@@ -5,14 +5,20 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.github.since1986.demo.id.IdGenerator;
+import com.github.since1986.demo.id.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.io.IOException;
 
+@EnableScheduling
+@EnableAspectJAutoProxy
 @EnableFeignClients
 @EnableTransactionManagement(proxyTargetClass = true)
 @Configuration
@@ -38,5 +44,10 @@ public class AppConfig {
                     }
                 });
         return objectMapper;
+    }
+
+    @Bean
+    public IdGenerator idGenerator() {
+        return new SnowflakeIdGenerator(0, 2);
     }
 }

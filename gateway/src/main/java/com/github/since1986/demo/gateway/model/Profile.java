@@ -1,10 +1,10 @@
-package com.github.since1986.demo.profile.model;
+package com.github.since1986.demo.gateway.model;
 
-import java.io.Serializable;
+import com.github.since1986.demo.gateway.annotation.EventPayload;
 
-public class Profile implements Serializable {
+@EventPayload
+public class Profile {
 
-    private Long id;
     private String username;
     private Long userId;
     private String name;
@@ -12,7 +12,6 @@ public class Profile implements Serializable {
     private String birthday;
 
     private Profile(Builder builder) {
-        setId(builder.id);
         setUsername(builder.username);
         setUserId(builder.userId);
         setName(builder.name);
@@ -22,14 +21,6 @@ public class Profile implements Serializable {
 
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -73,7 +64,6 @@ public class Profile implements Serializable {
     }
 
     public static final class Builder {
-        private Long id;
         private String username;
         private Long userId;
         private String name;
@@ -81,11 +71,6 @@ public class Profile implements Serializable {
         private String birthday;
 
         private Builder() {
-        }
-
-        public Builder withId(Long id) {
-            this.id = id;
-            return this;
         }
 
         public Builder withUsername(String username) {

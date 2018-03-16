@@ -59,4 +59,16 @@ INSERT INTO `authorities` (`id`, `username`, `authority`, `user`) VALUES (1, 'ad
 INSERT INTO `users` (`id`, `username`, `password`, `enabled`) VALUES (2, 'user', '$2a$10$Ct3PZQvgUciDcbJtmdPz5Ow1qGCCaYypD.4YILDDUhpWPQ0FfHwsm', TRUE);
 INSERT INTO `authorities` (`id`, `username`, `authority`, `user`) VALUES (2, 'user', 'ROLE_USER', 2);
 
-
+drop table if exists `events`;
+create table `events` (
+  `id`                                         INT(11)      NOT NULL,
+  `_status`                                    VARCHAR(16)  NOT NULL,
+  `remote_service_interface_name`              VARCHAR(255) NOT NULL,
+  `remote_service_spring_bean_name`            VARCHAR(255) NOT NULL,
+  `remote_service_method_name`                 VARCHAR(255) NOT NULL,
+  `remote_service_method_param_type_value_map` VARCHAR(255) NOT NULL,
+  `_timestamp`                                 INT(11)      NOT NULL,
+  PRIMARY KEY (`id`)
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
