@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedJdbcTypes;
+import org.apache.ibatis.type.MappedTypes;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
@@ -17,6 +19,8 @@ import java.util.Map;
 @Configuration
 public class MyBatisConfig {
 
+    @MappedJdbcTypes(JdbcType.VARCHAR)
+    @MappedTypes(Map.class)
     public class MapTypeHandler extends BaseTypeHandler<Map<String, String>> {
 
         private ObjectMapper objectMapper = new ObjectMapper();

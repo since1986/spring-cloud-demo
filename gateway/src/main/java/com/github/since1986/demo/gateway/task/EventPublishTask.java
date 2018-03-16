@@ -1,5 +1,6 @@
 package com.github.since1986.demo.gateway.task;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.since1986.demo.gateway.service.RemoteCallEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,8 +16,8 @@ public class EventPublishTask {
         this.remoteCallEventService = remoteCallEventService;
     }
 
-    @Scheduled(fixedRate = 1000)
-    private void execute() {
+    @Scheduled(fixedRate = 5000)
+    private void execute() throws JsonProcessingException {
         remoteCallEventService.publish();
     }
 }

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedJdbcTypes;
+import org.apache.ibatis.type.MappedTypes;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,8 @@ public class MyBatisConfig {
         return sqlSessionFactoryBean.getObject();
     }
 
+    @MappedJdbcTypes(JdbcType.VARCHAR)
+    @MappedTypes(Map.class)
     public class MapTypeHandler extends BaseTypeHandler<Map<String, String>> {
 
         private ObjectMapper objectMapper = new ObjectMapper();
