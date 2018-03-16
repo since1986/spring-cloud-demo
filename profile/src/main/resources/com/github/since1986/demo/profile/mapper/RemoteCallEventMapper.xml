@@ -7,25 +7,25 @@
 
     <insert id="save" keyProperty="id" keyColumn="id">
         insert into events (`id`, `_status`, `remote_service_interface_name`, `remote_service_spring_bean_name`, `remote_service_method_name`, `remote_service_method_param_type_value_map`, `_timestamp`)
-        values (#{event.id}, #{event._status}, #{event.remoteServiceInterfaceName}, #{event.remote_service_spring_bean_name}, #{event.remoteServiceMethodName}, #{event.remoteServiceMethodParamTypeValueMap}, #{event._timestamp})
+        values (#{event.id}, #{event._status, typeHandler=org.apache.ibatis.type.EnumTypeHandler}, #{event.remoteServiceInterfaceName}, #{event.remote_service_spring_bean_name}, #{event.remoteServiceMethodName}, #{event.remoteServiceMethodParamTypeValueMap}, #{event._timestamp})
     </insert>
     <update id="updateStatus">
         update events
-        set _status = #{status}
+        set _status = #{status, typeHandler=org.apache.ibatis.type.EnumTypeHandler}
         where id = #{id}
     </update>
     <select id="findByStatus" resultMap="RemoteCallEvent">
         select *
         from events
-        where _status = #{status}
+        where _status = #{status, typeHandler=org.apache.ibatis.type.EnumTypeHandler}
     </select>
     <resultMap id="RemoteCallEvent" type="com.github.since1986.demo.profile.model.RemoteCallEvent">
         <result property="id" column="id"/>
-        <result property="status" column="_status"/>
+        <result property="status" column="_status" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
         <result property="remoteServiceInterfaceName" column="remote_service_interface_name"/>
         <result property="remoteServiceSpringBeanName" column="remote_service_spring_bean_name"/>
         <result property="remoteServiceMethodName" column="remote_service_method_name"/>
-        <result property="remoteServiceMethodParamTypeValueMap" column="remote_service_method_param_type_value_map" typeHandler="com.github.since1986.demo.profile.MyBatisConfig.MapTypeHandler"/>
+        <result property="remoteServiceMethodParamTypeValueMap" column="remote_service_method_param_type_value_map" typeHandler="com.github.since1986.demo.profile.mapper.MapTypeHandler"/>
         <result property="timestamp" column="_timestamp"/>
     </resultMap>
 </mapper>

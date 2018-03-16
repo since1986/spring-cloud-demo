@@ -25,7 +25,7 @@
         <result property="remoteServiceInterfaceName" column="remote_service_interface_name"/>
         <result property="remoteServiceSpringBeanName" column="remote_service_spring_bean_name"/>
         <result property="remoteServiceMethodName" column="remote_service_method_name"/>
-        <result property="remoteServiceMethodParamTypeValueMap" column="remote_service_method_param_type_value_map" typeHandler="com.github.since1986.demo.gateway.MyBatisConfig.MapTypeHandler"/>
+        <result property="remoteServiceMethodParamTypeValueMap" column="remote_service_method_param_type_value_map" typeHandler="com.github.since1986.demo.gateway.mapper.MapTypeHandler"/>
         <result property="timestamp" column="_timestamp"/>
     </resultMap>
 </mapper>
