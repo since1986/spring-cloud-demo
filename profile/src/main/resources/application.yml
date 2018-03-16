@@ -50,7 +50,10 @@ app:
       - Cache-Control
       - Content-Type
     allowCredentials: true
-
+logging:
+  level:
+    com.github.since1986.demo.profile.mapper.ProfileMapper: TRACE
+    com.github.since1986.demo.profile.mapper.RemoteCallEventMapper: TRACE
 ---
 spring:
   profiles: production
@@ -105,3 +108,7 @@ app:
       - Cache-Control
       - Content-Type
     allowCredentials: true
+logging:
+  level:
+    com.github.since1986.demo.profile.mapper.ProfileMapper: ERROR
+    com.github.since1986.demo.profile.mapper.RemoteCallEventMapper: ERROR
