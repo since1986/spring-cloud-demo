@@ -20,8 +20,8 @@ public class RegisterController {
     }
 
     @PostMapping
-    public ResponseEntity execute(String username, String password) {
-        accountService.register(username, password, , );
+    public ResponseEntity execute(String username, String password, String name, String gender) {
+        accountService.register(username, password, name, gender);
         return new ResponseEntity(HttpStatus.CREATED);
     }
 }
