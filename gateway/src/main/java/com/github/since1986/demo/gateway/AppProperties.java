@@ -205,6 +205,7 @@ public class AppProperties {
             private String antMatcher;
             private String loginProcessingUrl;
             private String logoutUrl;
+            private String jwtSignerKey;
 
             public String getAntMatcher() {
                 return antMatcher;
@@ -228,6 +229,14 @@ public class AppProperties {
 
             public void setLogoutUrl(String logoutUrl) {
                 this.logoutUrl = logoutUrl;
+            }
+
+            public String getJwtSignerKey() {
+                return jwtSignerKey;
+            }
+
+            public void setJwtSignerKey(String jwtSignerKey) {
+                this.jwtSignerKey = jwtSignerKey;
             }
         }
 

@@ -11,7 +11,7 @@ import java.util.Date;
 public class IndexController {
 
     @GetMapping("/time")
-    public Date time(){
+    public Date time() {
         return new Date();
     }
 }

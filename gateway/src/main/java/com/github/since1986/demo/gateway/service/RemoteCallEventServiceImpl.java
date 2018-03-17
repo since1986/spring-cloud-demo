@@ -20,11 +20,10 @@ import java.util.List;
 @Service
 public class RemoteCallEventServiceImpl implements RemoteCallEventService {
 
-    private Logger LOGGER = LoggerFactory.getLogger(RemoteCallEventServiceImpl.class);
-
     private final ObjectMapper objectMapper;
     private final KafkaTemplate kafkaTemplate;
     private final RemoteCallEventMapper remoteCallEventMapper;
+    private Logger LOGGER = LoggerFactory.getLogger(RemoteCallEventServiceImpl.class);
 
     @Autowired
     public RemoteCallEventServiceImpl(RemoteCallEventMapper remoteCallEventMapper, KafkaTemplate kafkaTemplate, ObjectMapper objectMapper) {

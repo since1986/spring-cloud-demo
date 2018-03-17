@@ -61,8 +61,9 @@ app:
       antMatcher: /public/**
     privateWeb:
       antMatcher: /private/**
-      loginProcessingUrl: /login
-      logoutUrl: /logout
+      loginProcessingUrl: /private/login
+      logoutUrl: /private/logout
+      jwtSignerKey: 123456
     systemWeb:
       antMatcher: /system/**
       loginProcessingUrl: /system/login
@@ -72,11 +73,6 @@ app:
       developerUsername: developer
       developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
 
-security:
-  oauth2:
-    resource:
-      jwt:
-        key-value: 123456
 logging:
   level:
     com.github.since1986.demo.gateway.mapper.AuthorityMapper: TRACE
@@ -148,8 +144,9 @@ app:
       antMatcher: /public/**
     privateWeb:
       antMatcher: /private/**
-      loginProcessingUrl: /login
-      logoutUrl: /logout
+      loginProcessingUrl: /private/login
+      logoutUrl: /private/logout
+      jwtSignerKey: 123456
     systemWeb:
       antMatcher: /system/**
       loginProcessingUrl: /system/login
@@ -159,11 +156,6 @@ app:
       developerUsername: developer
       developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
 
-security:
-  oauth2:
-    resource:
-      jwt:
-        key-value: 123456
 logging:
   level:
     com.github.since1986.demo.gateway.mapper.AuthorityMapper: ERROR
