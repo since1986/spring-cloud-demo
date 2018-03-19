@@ -7,7 +7,7 @@
 
     <insert id="save" keyProperty="id" keyColumn="id">
         insert into events (`id`, `_status`, `remote_service_interface_name`, `remote_service_spring_bean_name`, `remote_service_method_name`, `remote_service_method_param_types`, `remote_service_method_param_values`, `_timestamp`)
-        values (#{event.id}, #{event.status, typeHandler=org.apache.ibatis.type.EnumTypeHandler}, #{event.remoteServiceInterfaceName}, #{event.remoteServiceSpringBeanName}, #{event.remoteServiceMethodName}, #{event.remoteServiceMethodParamTypes, typeHandler=com.github.since1986.demo.ibatis.ListTypeHandler}, #{event.remoteServiceMethodParamValues, typeHandler=com.github.since1986.demo.ibatis.ListTypeHandler}, #{event.timestamp})
+        values (#{event.id}, #{event.status, typeHandler=org.apache.ibatis.type.EnumTypeHandler}, #{event.remoteServiceInterfaceName}, #{event.remoteServiceSpringBeanName}, #{event.remoteServiceMethodName}, #{event.remoteServiceMethodParamTypes, typeHandler=com.github.since1986.demo.ibatis.ListClassTypeHandler}, #{event.remoteServiceMethodParamValues, typeHandler=com.github.since1986.demo.ibatis.ListStringTypeHandler}, #{event.timestamp})
     </insert>
     <update id="updateStatus">
         update events
@@ -25,8 +25,8 @@
         <result property="remoteServiceInterfaceName" column="remote_service_interface_name"/>
         <result property="remoteServiceSpringBeanName" column="remote_service_spring_bean_name"/>
         <result property="remoteServiceMethodName" column="remote_service_method_name"/>
-        <result property="remoteServiceMethodParamTypes" column="remote_service_method_param_types" typeHandler="com.github.since1986.demo.ibatis.ListTypeHandler"/>
-        <result property="remoteServiceMethodParamValues" column="remote_service_method_param_values" typeHandler="com.github.since1986.demo.ibatis.ListTypeHandler"/>
+        <result property="remoteServiceMethodParamTypes" column="remote_service_method_param_types" typeHandler="com.github.since1986.demo.ibatis.ListClassTypeHandler"/>
+        <result property="remoteServiceMethodParamValues" column="remote_service_method_param_values" typeHandler="com.github.since1986.demo.ibatis.ListStringTypeHandler"/>
         <result property="timestamp" column="_timestamp"/>
     </resultMap>
 </mapper>
