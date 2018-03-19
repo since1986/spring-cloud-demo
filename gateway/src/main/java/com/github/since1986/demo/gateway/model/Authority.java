@@ -9,6 +9,8 @@ public class Authority implements Serializable {
     private String authority;
     private long userId;
 
+    public Authority(){}
+
     private Authority(Builder builder) {
         setId(builder.id);
         setUsername(builder.username);

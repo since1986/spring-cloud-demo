@@ -10,6 +10,11 @@ public class Profile implements Serializable {
     private String name;
     private String gender;
     private String birthday;
+    private String email;
+    private String phone;
+
+    public Profile() {
+    }
 
     private Profile(Builder builder) {
         setId(builder.id);
@@ -18,6 +23,8 @@ public class Profile implements Serializable {
         setName(builder.name);
         setGender(builder.gender);
         setBirthday(builder.birthday);
+        setEmail(builder.email);
+        setPhone(builder.phone);
     }
 
     public static Builder newBuilder() {
@@ -72,6 +79,22 @@ public class Profile implements Serializable {
         this.birthday = birthday;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public static final class Builder {
         private Long id;
         private String username;
@@ -79,6 +102,8 @@ public class Profile implements Serializable {
         private String name;
         private String gender;
         private String birthday;
+        private String email;
+        private String phone;
 
         private Builder() {
         }
@@ -110,6 +135,16 @@ public class Profile implements Serializable {
 
         public Builder withBirthday(String birthday) {
             this.birthday = birthday;
+            return this;
+        }
+
+        public Builder withEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder withPhone(String phone) {
+            this.phone = phone;
             return this;
         }
 

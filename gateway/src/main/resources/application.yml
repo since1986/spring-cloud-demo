@@ -78,6 +78,9 @@ logging:
     com.github.since1986.demo.gateway.mapper.AuthorityMapper: TRACE
     com.github.since1986.demo.gateway.mapper.RemoteCallEventMapper: ERROR
     com.github.since1986.demo.gateway.mapper.UserMapper: TRACE
+    com.github.since1986.demo.gateway.service.RemoteCallEventServiceImpl: DEBUG
+    com.github.since1986.demo.gateway.service.ProfileServiceImpl: DEBUG
+    com.github.since1986.demo.gateway.mapper.ListTypeHandler: DEBUG
 
 ---
 spring:

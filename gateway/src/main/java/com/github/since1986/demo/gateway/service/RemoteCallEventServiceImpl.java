@@ -41,10 +41,12 @@ public class RemoteCallEventServiceImpl implements RemoteCallEventService {
     public void publish() throws JsonProcessingException {
         List<RemoteCallEvent> events = remoteCallEventMapper.findByStatus(RemoteCallEvent.Status.CREATED);
         for (RemoteCallEvent event : events) {
-            ListenableFuture<SendResult<String, String>> sendResultListenableFuture =
+            String data = objectMapper.writeValueAsString(event);
+            LOGGER.debug(data);
+            ListenableFuture<SendResult> sendResultListenableFuture =
                     kafkaTemplate.send(
                             event.getRemoteServiceInterfaceName() + event.getRemoteServiceMethodName(),
-                            objectMapper.writeValueAsString(event)
+                            data
                     );
             sendResultListenableFuture.addCallback(
                     result -> {

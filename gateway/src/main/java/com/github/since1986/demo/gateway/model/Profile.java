@@ -10,6 +10,10 @@ public class Profile {
     private String name;
     private String gender;
     private String birthday;
+    private String email;
+    private String phone;
+
+    public Profile(){}
 
     private Profile(Builder builder) {
         setUsername(builder.username);
@@ -17,6 +21,8 @@ public class Profile {
         setName(builder.name);
         setGender(builder.gender);
         setBirthday(builder.birthday);
+        setEmail(builder.email);
+        setPhone(builder.phone);
     }
 
     public static Builder newBuilder() {
@@ -63,12 +69,30 @@ public class Profile {
         this.birthday = birthday;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public static final class Builder {
         private String username;
         private Long userId;
         private String name;
         private String gender;
         private String birthday;
+        private String email;
+        private String phone;
 
         private Builder() {
         }
@@ -95,6 +119,16 @@ public class Profile {
 
         public Builder withBirthday(String birthday) {
             this.birthday = birthday;
+            return this;
+        }
+
+        public Builder withEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder withPhone(String phone) {
+            this.phone = phone;
             return this;
         }
 

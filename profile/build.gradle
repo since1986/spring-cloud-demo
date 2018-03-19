@@ -8,4 +8,5 @@ dependencies {
     compile group: 'org.aspectj', name: 'aspectjweaver', version: '1.8.13'
 
     compile project(':id')
+    compile project(':ibatis')
 }

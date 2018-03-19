@@ -9,6 +9,8 @@ public class User implements Serializable {
     private String password;
     private boolean enabled;
 
+    public User(){}
+
     private User(Builder builder) {
         setId(builder.id);
         setUsername(builder.username);

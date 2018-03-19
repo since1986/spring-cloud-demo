@@ -1,7 +1,7 @@
 package com.github.since1986.demo.profile.model;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 
 public class RemoteCallEvent implements Serializable {
 
@@ -10,8 +10,12 @@ public class RemoteCallEvent implements Serializable {
     private String remoteServiceSpringBeanName; //远程Service的Spring Bean名
     private String remoteServiceInterfaceName; //远程Service的接口名
     private String remoteServiceMethodName; //远程Service的方法名
-    private Map<String, String> remoteServiceMethodParamTypeValueMap; //远程Service的参数类型与值的映射
+    private List<Class> remoteServiceMethodParamTypes; //远程Service的参数类型
+    private List<?> remoteServiceMethodParamValues; //远程Service的参数值
     private long timestamp;
+
+    public RemoteCallEvent() {
+    }
 
     private RemoteCallEvent(Builder builder) {
         setId(builder.id);
@@ -19,7 +23,8 @@ public class RemoteCallEvent implements Serializable {
         setRemoteServiceSpringBeanName(builder.remoteServiceSpringBeanName);
         setRemoteServiceInterfaceName(builder.remoteServiceInterfaceName);
         setRemoteServiceMethodName(builder.remoteServiceMethodName);
-        setRemoteServiceMethodParamTypeValueMap(builder.remoteServiceMethodParamTypeValueMap);
+        setRemoteServiceMethodParamTypes(builder.remoteServiceMethodParamTypes);
+        setRemoteServiceMethodParamValues(builder.remoteServiceMethodParamValues);
         setTimestamp(builder.timestamp);
     }
 
@@ -67,12 +72,20 @@ public class RemoteCallEvent implements Serializable {
         this.remoteServiceMethodName = remoteServiceMethodName;
     }
 
-    public Map<String, String> getRemoteServiceMethodParamTypeValueMap() {
-        return remoteServiceMethodParamTypeValueMap;
+    public List<Class> getRemoteServiceMethodParamTypes() {
+        return remoteServiceMethodParamTypes;
     }
 
-    public void setRemoteServiceMethodParamTypeValueMap(Map<String, String> remoteServiceMethodParamTypeValueMap) {
-        this.remoteServiceMethodParamTypeValueMap = remoteServiceMethodParamTypeValueMap;
+    public void setRemoteServiceMethodParamTypes(List<Class> remoteServiceMethodParamTypes) {
+        this.remoteServiceMethodParamTypes = remoteServiceMethodParamTypes;
+    }
+
+    public List<?> getRemoteServiceMethodParamValues() {
+        return remoteServiceMethodParamValues;
+    }
+
+    public void setRemoteServiceMethodParamValues(List<?> remoteServiceMethodParamValues) {
+        this.remoteServiceMethodParamValues = remoteServiceMethodParamValues;
     }
 
     public long getTimestamp() {
@@ -96,7 +109,8 @@ public class RemoteCallEvent implements Serializable {
         private String remoteServiceSpringBeanName;
         private String remoteServiceInterfaceName;
         private String remoteServiceMethodName;
-        private Map<String, String> remoteServiceMethodParamTypeValueMap;
+        private List<Class> remoteServiceMethodParamTypes;
+        private List<?> remoteServiceMethodParamValues;
         private long timestamp;
 
         private Builder() {
@@ -127,8 +141,13 @@ public class RemoteCallEvent implements Serializable {
             return this;
         }
 
-        public Builder withRemoteServiceMethodParamTypeValueMap(Map<String, String> remoteServiceMethodParamTypeValueMap) {
-            this.remoteServiceMethodParamTypeValueMap = remoteServiceMethodParamTypeValueMap;
+        public Builder withRemoteServiceMethodParamTypes(List<Class> remoteServiceMethodParamTypes) {
+            this.remoteServiceMethodParamTypes = remoteServiceMethodParamTypes;
+            return this;
+        }
+
+        public Builder withRemoteServiceMethodParamValues(List<?> remoteServiceMethodParamValues) {
+            this.remoteServiceMethodParamValues = remoteServiceMethodParamValues;
             return this;
         }
 

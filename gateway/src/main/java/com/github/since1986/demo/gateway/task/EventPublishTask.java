@@ -16,7 +16,7 @@ public class EventPublishTask {
         this.remoteCallEventService = remoteCallEventService;
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 3000)
     private void execute() throws JsonProcessingException {
         remoteCallEventService.publish();
     }

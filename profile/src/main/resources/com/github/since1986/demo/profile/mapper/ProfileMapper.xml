@@ -5,7 +5,7 @@
 
 <mapper namespace="com.github.since1986.demo.profile.mapper.ProfileMapper">
     <insert id="save">
-        insert into profile (`id`, `username`, `user_id`, `_name`, `gender`, `birthday`) values (#{profile.id}, #{profile.username}, #{profile.userId}, #{profile.name}, #{profile.gender}, #{profile.birthday})
+        insert into profile (`id`, `username`, `user_id`, `_name`, `gender`, `birthday`, `email`, `phone`) values (#{profile.id}, #{profile.username}, #{profile.userId}, #{profile.name}, #{profile.gender}, #{profile.birthday}, #{profile.email}, #{profile.phone})
     </insert>
 
     <select id="get" resultMap="Profile">
@@ -20,5 +20,7 @@
         <result property="name" column="_name"/>
         <result property="gender" column="gender"/>
         <result property="birthday" column="birthday"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
     </resultMap>
 </mapper>

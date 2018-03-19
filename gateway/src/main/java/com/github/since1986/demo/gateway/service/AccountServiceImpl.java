@@ -34,12 +34,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void register(String username, String password, String name, String gender) {
-        long userId = idGenerator.nextId();
+    public void register(String username, String password, String email, String phone) {
+        long newUserId = idGenerator.nextId();
         userMapper.save(
                 User
                         .newBuilder()
-                        .withId(userId)
+                        .withId(newUserId)
                         .withUsername(username)
                         .withPassword(passwordEncoder.encode(password))
                         .withEnabled(true)
@@ -50,10 +50,10 @@ public class AccountServiceImpl implements AccountService {
                         .newBuilder()
                         .withId(idGenerator.nextId())
                         .withAuthority("ROLE_USER")
-                        .withUserId(userId)
+                        .withUserId(newUserId)
                         .withUsername(username)
                         .build()
         );
-        profileService.save(name, gender);
+        profileService.save(email, phone);
     }
 }

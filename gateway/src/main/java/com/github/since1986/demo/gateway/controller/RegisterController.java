@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/register")
+@RequestMapping("/private/register")
 @RestController
 public class RegisterController {
 
@@ -20,8 +20,8 @@ public class RegisterController {
     }
 
     @PostMapping
-    public ResponseEntity execute(String username, String password, String name, String gender) {
-        accountService.register(username, password, name, gender);
+    public ResponseEntity execute(String username, String password, String email, String phone) {
+        accountService.register(username, password, email, phone);
         return new ResponseEntity(HttpStatus.CREATED);
     }
 }

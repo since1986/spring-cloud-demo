@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS `groups`;
 
 # 建表
 CREATE TABLE `users` (
-  `id`       INT(11)      NOT NULL,
+  `id`       BIGINT       NOT NULL,
   `username` VARCHAR(16)  NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `enabled`  BIT(1)       NOT NULL DEFAULT TRUE,
@@ -18,17 +18,17 @@ CREATE TABLE `users` (
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 CREATE TABLE `authorities` (
-  `id`        INT(11)     NOT NULL,
+  `id`        BIGINT      NOT NULL,
   `username`  VARCHAR(16) NOT NULL,
   `authority` VARCHAR(64) NOT NULL,
-  `user`      INT(11)     NOT NULL,
+  `user`      BIGINT      NOT NULL,
   PRIMARY KEY (`id`)
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 CREATE TABLE `groups` (
-  `id`         INT(11)     NOT NULL,
+  `id`         BIGINT      NOT NULL,
   `group_name` VARCHAR(64) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `group_name_unique` (`group_name`)
@@ -36,16 +36,16 @@ CREATE TABLE `groups` (
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 CREATE TABLE `group_members` (
-  `id`       INT(11)     NOT NULL,
+  `id`       BIGINT      NOT NULL,
   `username` VARCHAR(64) NOT NULL,
-  `group_id` INT(11) DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_group_members_group_idx` (`group_id`)
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 CREATE TABLE `group_authorities` (
-  `group_id`  INT(11)     NOT NULL,
+  `group_id`  BIGINT      NOT NULL,
   `authority` VARCHAR(64) NOT NULL,
   KEY `fk_group_authorities_group_idx` (`group_id`)
 )
@@ -61,13 +61,14 @@ INSERT INTO `authorities` (`id`, `username`, `authority`, `user`) VALUES (2, 'us
 
 drop table if exists `events`;
 create table `events` (
-  `id`                                         INT(11)      NOT NULL,
-  `_status`                                    VARCHAR(16)  NOT NULL,
-  `remote_service_interface_name`              VARCHAR(255) NOT NULL,
-  `remote_service_spring_bean_name`            VARCHAR(255) NOT NULL,
-  `remote_service_method_name`                 VARCHAR(255) NOT NULL,
-  `remote_service_method_param_type_value_map` VARCHAR(255) NOT NULL,
-  `_timestamp`                                 INT(11)      NOT NULL,
+  `id`                                 BIGINT       NOT NULL,
+  `_status`                            VARCHAR(16)  NOT NULL,
+  `remote_service_interface_name`      VARCHAR(255) NOT NULL,
+  `remote_service_spring_bean_name`    VARCHAR(255) NOT NULL,
+  `remote_service_method_name`         VARCHAR(255) NOT NULL,
+  `remote_service_method_param_types`  LONGTEXT     NOT NULL,
+  `remote_service_method_param_values` LONGTEXT     NOT NULL,
+  `_timestamp`                         BIGINT       NOT NULL,
   PRIMARY KEY (`id`)
 )
   ENGINE = InnoDB

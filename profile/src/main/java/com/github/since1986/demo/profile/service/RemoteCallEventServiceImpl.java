@@ -13,9 +13,7 @@ import org.springframework.web.context.ContextLoader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Transactional
 @Service
@@ -37,19 +35,10 @@ public class RemoteCallEventServiceImpl implements RemoteCallEventService {
         for (RemoteCallEvent event : events) {
             Object serviceBean = ContextLoader.getCurrentWebApplicationContext().getBean(event.getRemoteServiceSpringBeanName(), event.getRemoteServiceInterfaceName());
 
-            Map<String, String> remoteServiceMethodParamTypeValueMap = event.getRemoteServiceMethodParamTypeValueMap();
-            List<Class<?>> paramTypes = new ArrayList<>();
-            List<Object> param = new ArrayList<>();
-            remoteServiceMethodParamTypeValueMap.forEach((paramType, paramValue) -> {
-                try {
-                    paramTypes.add(Class.forName(paramType));
-                    param.add(objectMapper.readValue(paramValue, Class.forName(paramType)));
-                } catch (ClassNotFoundException | IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            Method serviceMethod = serviceBean.getClass().getMethod(event.getRemoteServiceMethodName(), paramTypes.toArray(new Class<?>[0]));
-            serviceMethod.invoke(serviceBean, param.toArray(new Object[0]));
+            List<Class> remoteServiceMethodParamTypes = event.getRemoteServiceMethodParamTypes();
+            List<?> remoteServiceMethodParamValues = event.getRemoteServiceMethodParamValues();
+            Method serviceMethod = serviceBean.getClass().getMethod(event.getRemoteServiceMethodName(), remoteServiceMethodParamTypes.toArray(new Class[0]));
+            serviceMethod.invoke(serviceBean, remoteServiceMethodParamValues.toArray(new Object[0]));
             LOGGER.debug(serviceMethod.toGenericString());
             remoteCallEventMapper.updateStatus(event.getId(), RemoteCallEvent.Status.CONSUMED);
         }
