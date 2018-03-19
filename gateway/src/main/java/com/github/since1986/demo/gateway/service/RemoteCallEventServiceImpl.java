@@ -45,9 +45,9 @@ public class RemoteCallEventServiceImpl implements RemoteCallEventService {
             LOGGER.debug(data);
             ListenableFuture<SendResult> sendResultListenableFuture =
                     kafkaTemplate.send(
-                            event.getRemoteServiceInterfaceName() + event.getRemoteServiceMethodName(),
+                            "PROFILE_SERVICE",
                             data
-                    );
+                    ); //TODO 现在topic是写死的，考虑做成动态的
             sendResultListenableFuture.addCallback(
                     result -> {
                         LOGGER.debug(result.getRecordMetadata().toString());

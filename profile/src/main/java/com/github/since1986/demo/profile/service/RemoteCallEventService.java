@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public interface RemoteCallEventService {
 
-    void consume() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException;
+    void consume() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException;
 
     void save(String json) throws IOException;
 }

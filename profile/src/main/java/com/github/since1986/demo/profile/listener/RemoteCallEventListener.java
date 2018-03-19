@@ -21,7 +21,7 @@ public class RemoteCallEventListener {
         this.remoteCallEventService = remoteCallEventService;
     }
 
-    @KafkaListener(topics = "event-user-saved")
+    @KafkaListener(topics = "PROFILE_SERVICE")
     public void listen(String payload) throws IOException {
         LOGGER.debug("event received: " + payload);
         remoteCallEventService.save(payload);
