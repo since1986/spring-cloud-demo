@@ -7,4 +7,6 @@ public interface ProfileService {
     Profile get(long id);
 
     void save(Profile profile);
+
+    void save(String email, String phone);
 }

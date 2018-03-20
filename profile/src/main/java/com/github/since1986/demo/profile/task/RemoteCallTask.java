@@ -18,7 +18,7 @@ public class RemoteCallTask {
     }
 
     @Scheduled(fixedRate = 2000)
-    public void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+    public void call() throws Throwable {
         remoteCallEventService.consume();
     }
 }
