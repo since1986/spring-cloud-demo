@@ -64,7 +64,7 @@ create table `events` (
   `id`                                 BIGINT       NOT NULL,
   `_status`                            VARCHAR(16)  NOT NULL,
   `remote_service_interface_name`      VARCHAR(255) NOT NULL,
-  `remote_service_spring_bean_name`    VARCHAR(255) NOT NULL,
+  `remote_service_spring_bean_name`    VARCHAR(255),
   `remote_service_method_name`         VARCHAR(255) NOT NULL,
   `remote_service_method_param_types`  LONGTEXT     NOT NULL,
   `remote_service_method_param_values` LONGTEXT     NOT NULL,
