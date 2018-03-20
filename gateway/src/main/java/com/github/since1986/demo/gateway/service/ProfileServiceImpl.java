@@ -32,7 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
         //1.将远程Service的接口以及远程定义的Model按照原包层级拷贝到本地工程中，在拷贝过来远程Service上加上@RemoteService注解以标识为远程接口
         //2.实现一个注解处理的类，通过反射拿到标识了@RemoteService的接口的InterfaceName以及MethodName信息（其他扩展信息定义在@RemoteService的属性中，可定义className、beanName）
         //3.将拿到的InterfaceName以及MethodName信息填入以下流程，这样就是声明式了，而不是硬编码了
-        //4.提供一个底层的编程式调用接口，以方便更灵活的调用
+        //4.提供一个底层的编程式调用接口，以方便更灵活的调用 RemoteServiceManager.invoke(RemoteServiceDefinition remoteServiceDefinition);
         List<Class> remoteServiceMethodParamTypes = new ArrayList<>();
         remoteServiceMethodParamTypes.add(email.getClass());
         remoteServiceMethodParamTypes.add(phone.getClass());
