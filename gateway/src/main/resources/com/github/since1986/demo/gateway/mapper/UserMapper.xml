@@ -8,6 +8,11 @@
     <insert id="save" keyProperty="id" keyColumn="id">
         insert into users values (#{user.id}, #{user.username}, #{user.password}, #{user.enabled})
     </insert>
+    <select id="get" resultMap="User">
+        select *
+        from users
+        where username = #{username}
+    </select>
     <resultMap id="User" type="com.github.since1986.demo.gateway.model.User">
         <result property="id" column="id"/>
         <result property="username" column="username"/>

@@ -6,4 +6,6 @@ import org.apache.ibatis.annotations.Param;
 public interface UserMapper {
 
     void save(@Param("user") User user);
+
+    User get(String username);
 }

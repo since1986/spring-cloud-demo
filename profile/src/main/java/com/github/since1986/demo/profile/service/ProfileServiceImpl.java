@@ -34,8 +34,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public Profile get(long id) {
-        return profileMapper.get(id);
+    public Profile get(String username) {
+        return profileMapper.get(username);
     }
 
 

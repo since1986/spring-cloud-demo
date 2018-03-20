@@ -11,7 +11,7 @@
     <select id="get" resultMap="Profile">
         SELECT *
         FROM profile
-        WHERE id = #{id}
+        WHERE username = #{username}
     </select>
     <resultMap id="Profile" type="com.github.since1986.demo.profile.model.Profile">
         <result property="id" column="id"/>

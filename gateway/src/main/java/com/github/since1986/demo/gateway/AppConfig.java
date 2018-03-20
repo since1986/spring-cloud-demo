@@ -9,6 +9,7 @@ import com.github.since1986.demo.id.IdGenerator;
 import com.github.since1986.demo.id.SnowflakeIdGenerator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.io.IOException;
 
+@EnableFeignClients
 @EnableScheduling
 @EnableAspectJAutoProxy
 @EnableTransactionManagement(proxyTargetClass = true)

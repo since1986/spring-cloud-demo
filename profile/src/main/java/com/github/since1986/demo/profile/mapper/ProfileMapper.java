@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 public interface ProfileMapper {
 
-    Profile get(long id);
+    Profile get(String username);
 
     void save(@Param("profile") Profile profile);
 }
