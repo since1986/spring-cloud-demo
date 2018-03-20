@@ -40,6 +40,7 @@ public abstract class ProfileServiceImpl implements ProfileService {
         //1.可以借鉴Retrofit以及Feign的设计方式
         //2.传递给中间件的对象转换成json，定义调用通过定义@RequestMapping来定义（类似@Feign）,接收端想办法由request mapping中的url信息反查出service的bean信息，而不是通过service的限定名和方法名（该如何实现？）
         //3.想办法与Feign整合在一起，以支持内置的注册发现、负载均衡等功能，并且最重要的是实现编程模型的统一
+        //4.底层的编程式调用接口可以参考Retrofit的设计方式
         List<Class> remoteServiceMethodParamTypes = new ArrayList<>();
         remoteServiceMethodParamTypes.add(email.getClass());
         remoteServiceMethodParamTypes.add(phone.getClass());
