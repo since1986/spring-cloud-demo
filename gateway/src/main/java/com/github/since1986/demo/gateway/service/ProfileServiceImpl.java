@@ -41,7 +41,6 @@ public class ProfileServiceImpl implements ProfileService {
                         .withStatus(RemoteCallEvent.Status.CREATED)
                         .withTimestamp(System.currentTimeMillis())
                         .withRemoteServiceInterfaceName("com.github.since1986.demo.profile.service.ProfileService")
-                        .withRemoteServiceSpringBeanName("profileService")
                         .withRemoteServiceMethodName("save")
                         .withRemoteServiceMethodParamTypes(remoteServiceMethodParamTypes)
                         .withRemoteServiceMethodParamValues(remoteServiceMethodParamValues)
