@@ -164,3 +164,254 @@ logging:
     com.github.since1986.demo.gateway.mapper.AuthorityMapper: ERROR
     com.github.since1986.demo.gateway.mapper.RemoteCallEventMapper: ERROR
     com.github.since1986.demo.gateway.mapper.UserMapper: ERROR
+
+
+#高可用配置（三节点）
+---
+spring:
+  profiles: gateway1
+  application:
+    name: comgithubsince1986demogateway
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .jsp
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: demo-group
+    producer:
+      acks: all #所有kafka节点全接受到才表示发送成功
+
+server:
+  port: 9001
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka1:8001/eureka/,http://eureka2:8002/eureka/,http://eureka3:8003/eureka/
+
+zuul:
+  routes:
+    profile:
+      path: /private/profile/**
+      serviceId: comgithubsince1986demoprofile
+
+app:
+  defaultCharacterEncoding: utf-8
+
+  dataSource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/gateway?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
+
+  cors:
+    mapping: /**
+    allowedOrigins:
+      - http://localhost:63342
+      - http://localhost:63343
+      - http://localhost:63344
+    allowedMethods:
+      - OPTIONS
+      - HEAD
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    allowedHeaders:
+      - Authorization
+      - Cache-Control
+      - Content-Type
+    allowCredentials: true
+
+  security:
+    publicWeb:
+      antMatcher: /public/**
+    privateWeb:
+      antMatcher: /private/**
+      loginProcessingUrl: /private/login
+      logoutUrl: /private/logout
+      jwtSignerKey: 123456
+    systemWeb:
+      antMatcher: /system/**
+      loginProcessingUrl: /system/login
+      logoutUrl: /system/logout
+      systemUsername: system
+      systemPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+      developerUsername: developer
+      developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+
+logging:
+  level:
+    com.github.since1986.demo.gateway.mapper.AuthorityMapper: ERROR
+    com.github.since1986.demo.gateway.mapper.RemoteCallEventMapper: ERROR
+    com.github.since1986.demo.gateway.mapper.UserMapper: ERROR
+
+---
+spring:
+  profiles: gateway2
+  application:
+    name: comgithubsince1986demogateway
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .jsp
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: demo-group
+    producer:
+      acks: all #所有kafka节点全接受到才表示发送成功
+
+server:
+  port: 9002
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka1:8001/eureka/,http://eureka2:8002/eureka/,http://eureka3:8003/eureka/
+
+zuul:
+  routes:
+    profile:
+      path: /private/profile/**
+      serviceId: comgithubsince1986demoprofile
+
+app:
+  defaultCharacterEncoding: utf-8
+
+  dataSource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/gateway?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
+
+  cors:
+    mapping: /**
+    allowedOrigins:
+      - http://localhost:63342
+      - http://localhost:63343
+      - http://localhost:63344
+    allowedMethods:
+      - OPTIONS
+      - HEAD
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    allowedHeaders:
+      - Authorization
+      - Cache-Control
+      - Content-Type
+    allowCredentials: true
+
+  security:
+    publicWeb:
+      antMatcher: /public/**
+    privateWeb:
+      antMatcher: /private/**
+      loginProcessingUrl: /private/login
+      logoutUrl: /private/logout
+      jwtSignerKey: 123456
+    systemWeb:
+      antMatcher: /system/**
+      loginProcessingUrl: /system/login
+      logoutUrl: /system/logout
+      systemUsername: system
+      systemPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+      developerUsername: developer
+      developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+
+logging:
+  level:
+    com.github.since1986.demo.gateway.mapper.AuthorityMapper: ERROR
+    com.github.since1986.demo.gateway.mapper.RemoteCallEventMapper: ERROR
+    com.github.since1986.demo.gateway.mapper.UserMapper: ERROR
+
+---
+spring:
+  profiles: gateway3
+  application:
+    name: comgithubsince1986demogateway
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .jsp
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: demo-group
+    producer:
+      acks: all #所有kafka节点全接受到才表示发送成功
+
+server:
+  port: 9003
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka1:8001/eureka/,http://eureka2:8002/eureka/,http://eureka3:8003/eureka/
+
+zuul:
+  routes:
+    profile:
+      path: /private/profile/**
+      serviceId: comgithubsince1986demoprofile
+
+app:
+  defaultCharacterEncoding: utf-8
+
+  dataSource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/gateway?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
+
+  cors:
+    mapping: /**
+    allowedOrigins:
+      - http://localhost:63342
+      - http://localhost:63343
+      - http://localhost:63344
+    allowedMethods:
+      - OPTIONS
+      - HEAD
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    allowedHeaders:
+      - Authorization
+      - Cache-Control
+      - Content-Type
+    allowCredentials: true
+
+  security:
+    publicWeb:
+      antMatcher: /public/**
+    privateWeb:
+      antMatcher: /private/**
+      loginProcessingUrl: /private/login
+      logoutUrl: /private/logout
+      jwtSignerKey: 123456
+    systemWeb:
+      antMatcher: /system/**
+      loginProcessingUrl: /system/login
+      logoutUrl: /system/logout
+      systemUsername: system
+      systemPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+      developerUsername: developer
+      developerPassword: $2a$10$XbzHip14DlqK3wKaJTJZrOJ3ftDU3hGrUZKCWrmktcNEUh3sC9NVC
+
+logging:
+  level:
+    com.github.since1986.demo.gateway.mapper.AuthorityMapper: ERROR
+    com.github.since1986.demo.gateway.mapper.RemoteCallEventMapper: ERROR
+    com.github.since1986.demo.gateway.mapper.UserMapper: ERROR
