@@ -197,6 +197,9 @@ zuul:
     profile:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
+    user:
+      path: /private/user/**
+      serviceId: comgithubsince1986demogateway
 
 app:
   defaultCharacterEncoding: utf-8
@@ -280,6 +283,9 @@ zuul:
     profile:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
+    user:
+      path: /private/user/**
+      serviceId: comgithubsince1986demogateway
 
 app:
   defaultCharacterEncoding: utf-8
@@ -363,6 +369,9 @@ zuul:
     profile:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
+    user:
+      path: /private/user/**
+      serviceId: comgithubsince1986demogateway
 
 app:
   defaultCharacterEncoding: utf-8
