@@ -34,6 +34,10 @@ eureka:
 
 
 #以下为高可用配置(3个节点)
+#本地测试需要修改hosts文件
+#127.0.0.1	eureka1
+#127.0.0.1	eureka2
+#127.0.0.1	eureka3
 ---
 spring:
   profiles: eureka1
