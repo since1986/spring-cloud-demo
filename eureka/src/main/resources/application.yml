@@ -12,7 +12,7 @@ eureka:
     registerWithEureka: false
     fetchRegistry: false
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
 
 ---
 spring:
@@ -30,4 +30,57 @@ eureka:
     registerWithEureka: false
     fetchRegistry: false
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+
+#以下为高可用配置(3个节点)
+---
+spring:
+  profiles: eureka1
+  application:
+    name: comgithubsince1986demoeureka
+
+server:
+  port: 8001
+
+eureka:
+  instance:
+    hostname: eureka1
+  client:
+    serviceUrl:
+      defaultZone: http://eureka2:8002/eureka/,http://eureka3:8003/eureka/
+    register-with-eureka: true #需要配置这一项才生效（虽然默认这个配置是true，但是可能默认配置被覆盖掉了所以未生效）
+
+---
+spring:
+  profiles: eureka2
+  application:
+    name: comgithubsince1986demoeureka
+
+server:
+  port: 8002
+
+eureka:
+  instance:
+    hostname: eureka2
+  client:
+    serviceUrl:
+      defaultZone: http://eureka1:8001/eureka/,http://eureka3:8003/eureka/
+    register-with-eureka: true
+
+---
+spring:
+  profiles: eureka3
+  application:
+    name: comgithubsince1986demoeureka
+
+server:
+  port: 8003
+
+eureka:
+  instance:
+    hostname: eureka3
+  client:
+    serviceUrl:
+      defaultZone: http://eureka1:8001/eureka/,http://eureka2:8002/eureka/
+    register-with-eureka: true
