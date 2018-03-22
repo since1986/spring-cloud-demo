@@ -53,7 +53,8 @@ app:
 logging:
   level:
     com.github.since1986.demo.profile.mapper.ProfileMapper: TRACE
-    com.github.since1986.demo.profile.mapper.RemoteCallEventMapper: TRACE
+    com.github.since1986.demo.profile.mapper.RemoteCallEventMapper: ERROR
+    org.apache.kafka.clients.NetworkClient: ERROR #WARN 暂时禁用
 ---
 spring:
   profiles: production

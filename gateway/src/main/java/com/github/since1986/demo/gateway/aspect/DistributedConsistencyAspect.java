@@ -1,7 +1,6 @@
 package com.github.since1986.demo.gateway.aspect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.since1986.demo.gateway.annotation.EventPayload;
 import com.github.since1986.demo.gateway.model.RemoteCallEvent;
 import com.github.since1986.demo.gateway.service.RemoteCallEventService;
 import com.github.since1986.demo.id.IdGenerator;
@@ -12,7 +11,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-//所有需要分布一致性的过程全部由此处理
+//TODO 实现类似Feign的调用方式，可以不用aspect而使用代理
 @Aspect
 @Component
 public class DistributedConsistencyAspect {
@@ -28,7 +27,7 @@ public class DistributedConsistencyAspect {
         this.objectMapper = objectMapper;
     }
 
-    @Pointcut("@annotation(com.github.since1986.demo.gateway.annotation.DistributedConsistency)")
+    @Pointcut("@annotation(com.github.since1986.demo.gateway.annotation.RemoteService)")
     public void pointcut() {
     }
 
@@ -37,9 +36,6 @@ public class DistributedConsistencyAspect {
     public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         Object payload = null;
         for (Object arg : proceedingJoinPoint.getArgs()) {
-            if (arg != null && arg.getClass().getDeclaredAnnotation(EventPayload.class) != null) {
-                payload = arg;
-            }
         }
         remoteCallEventService.save(
                 RemoteCallEvent

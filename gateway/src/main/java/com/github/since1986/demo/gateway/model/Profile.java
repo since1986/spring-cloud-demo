@@ -1,10 +1,8 @@
 package com.github.since1986.demo.gateway.model;
 
-import com.github.since1986.demo.gateway.annotation.EventPayload;
-
-@EventPayload
 public class Profile {
 
+    private Long id;
     private String username;
     private Long userId;
     private String name;
@@ -13,9 +11,11 @@ public class Profile {
     private String email;
     private String phone;
 
-    public Profile(){}
+    public Profile() {
+    }
 
     private Profile(Builder builder) {
+        setId(builder.id);
         setUsername(builder.username);
         setUserId(builder.userId);
         setName(builder.name);
@@ -27,6 +27,14 @@ public class Profile {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -93,6 +101,7 @@ public class Profile {
         private String birthday;
         private String email;
         private String phone;
+        private Long id;
 
         private Builder() {
         }
@@ -134,6 +143,11 @@ public class Profile {
 
         public Profile build() {
             return new Profile(this);
+        }
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
         }
     }
 }

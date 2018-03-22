@@ -5,9 +5,11 @@ import com.github.since1986.demo.profile.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/profile")
+@RequestMapping("/profile")
+@RestController
 public class ProfileController {
 
     private final ProfileService profileService;

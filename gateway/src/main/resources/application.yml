@@ -22,8 +22,8 @@ eureka:
       defaultZone: http://localhost:8001/eureka/
 
 zuul:
-  routes:
-    profile:
+  routes: #注意，本地URI默认不路由
+    profile: #route配置的含义：将 <path> 对应规则的URI转发给注册Id为 <serviceId> 的服务
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
 
@@ -197,9 +197,6 @@ zuul:
     profile:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
-    user:
-      path: /private/user/**
-      serviceId: comgithubsince1986demogateway
 
 app:
   defaultCharacterEncoding: utf-8
@@ -283,9 +280,6 @@ zuul:
     profile:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
-    user:
-      path: /private/user/**
-      serviceId: comgithubsince1986demogateway
 
 app:
   defaultCharacterEncoding: utf-8
@@ -369,9 +363,6 @@ zuul:
     profile:
       path: /private/profile/**
       serviceId: comgithubsince1986demoprofile
-    user:
-      path: /private/user/**
-      serviceId: comgithubsince1986demogateway
 
 app:
   defaultCharacterEncoding: utf-8
