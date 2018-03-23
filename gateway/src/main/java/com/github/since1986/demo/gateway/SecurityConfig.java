@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.Http401AuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -21,6 +22,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,16 +35,14 @@ import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.security.web.context.HttpRequestResponseHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
@@ -133,7 +133,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     //需要认证与授权的资源 /private/**
     @Order(-3)
-    //注意Order 用 SecurityProperties.ACCESS_OVERRIDE_ORDER -998 导致csrf配置不生效，所以干脆换成负数了,原因：WebSecurityConfigurerAdapter 的 Order是 100 比SecurityProperties.ACCESS_OVERRIDE_ORDER -998 小很多 https://stackoverflow.com/questions/45529743/ordersecurityproperties-access-override-order-vs-managementserverproperties-a
+    //注意Order 用 SecurityProperties.ACCESS_OVERRIDE_ORDER -998 导致csrf配置不生效（原因：WebSecurityConfigurerAdapter 的 Order 是 100 比SecurityProperties.ACCESS_OVERRIDE_ORDER -998 小很多 https://stackoverflow.com/questions/45529743/ordersecurityproperties-access-override-order-vs-managementserverproperties-a）
     @Configuration
     public static class PrivateWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
@@ -172,21 +172,41 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
-                    .addFilterBefore(new OncePerRequestFilter() {
+                    .securityContext()
+                    .securityContextRepository(new SecurityContextRepository() { //提供给 SecurityContextPersistenceFilter 来调用（SecurityContextPersistenceFilter 两个主要职责：请求来临时，创建 SecurityContext 安全上下文信息，请求结束时清空 SecurityContextHolder https://www.cnkirito.moe/2017/09/30/spring-security-4/）
 
                         @Override
-                        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {  //检查Jwt header 是否存在，解析Jwt为UsernamePasswordAuthenticationToken后放入SecurityContext
+                        public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
+                            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+
+                            HttpServletRequest request = requestResponseHolder.getRequest();
                             String jwtHeader = request.getHeader("Authorization");
                             if (StringUtils.isNoneEmpty(jwtHeader) && StringUtils.startsWith(jwtHeader, "Bearer ")) {
                                 Jwt jwt = JwtHelper.decodeAndVerify(StringUtils.removeStart(jwtHeader, "Bearer "), jwtSigner());
-                                JwtPayload jwtPayload = objectMapper.readValue(jwt.getClaims(), JwtPayload.class);
+                                JwtPayload jwtPayload;
+                                try {
+                                    jwtPayload = objectMapper.readValue(jwt.getClaims(), JwtPayload.class);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
                                 List<GrantedAuthority> authorities = jwtPayload.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-                                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(jwtPayload.getUsername(), "*PROTECTED*", authorities));
+                                securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(jwtPayload.getUsername(), "*PROTECTED*", authorities));
                             }
-                            //TODO Jwt过期校验
-                            filterChain.doFilter(request, response);
+                            return securityContext;
                         }
-                    }, UsernamePasswordAuthenticationFilter.class);
+
+                        @Override
+                        public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
+                            //JWT 是不需要存储 SecurityContext 的
+                        }
+
+                        @Override
+                        public boolean containsContext(HttpServletRequest request) {
+                            //TODO JWT 过期检查
+                            String jwtHeader = request.getHeader("Authorization");
+                            return StringUtils.isNoneEmpty(jwtHeader) && StringUtils.startsWith(jwtHeader, "Bearer ");
+                        }
+                    });
             http
                     .antMatcher(appProperties.getSecurity().getPrivateWeb().getAntMatcher())
                     .httpBasic().disable()
@@ -198,9 +218,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
 
                     .exceptionHandling()
-                    .authenticationEntryPoint((request, response, authException) -> { //认证入口点
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());
-                    })
+                    .authenticationEntryPoint(new Http401AuthenticationEntryPoint("JWT"))
                     .and()
                     .formLogin().loginProcessingUrl(appProperties.getSecurity().getPrivateWeb().getLoginProcessingUrl()).permitAll()
                     .successHandler((request, response, authentication) -> { //认证成功
@@ -208,17 +226,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         jwtPayload.setUsername(authentication.getPrincipal().toString());
                         jwtPayload.setAuthorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
                         Jwt jwt = JwtHelper.encode(objectMapper.writeValueAsString(jwtPayload), jwtSigner());
-                        response.addHeader("Authorization", String.format("Bearer %s", jwt.getEncoded()));
+                        response.addHeader("WWW-Authenticate", String.format("Bearer %s", jwt.getEncoded()));
                         objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
                     })
                     .failureHandler((request, response, exception) -> { //认证失败
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getLocalizedMessage());
+                        response.setHeader("WWW-Authenticate", "JWT");
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getMessage());
                     })
                     .and()
                     .logout()
                     .logoutUrl(appProperties.getSecurity().getPrivateWeb().getLogoutUrl())
                     .logoutSuccessHandler((request, response, authentication) -> {
-                        response.addHeader("Authorization", "Bearer "); //退出登录后清除掉Jwt header中的信息
+                        response.addHeader("WWW-Authenticate", "JWT"); //退出登录后清除掉Jwt header中的Bearer信息
                     }).permitAll()
 
                     .and()
@@ -229,7 +248,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .exceptionHandling()
                     .accessDeniedHandler((request, response, accessDeniedException) -> { //AccessDeniedHandler只对已经通过认证的用户（也就是已经登陆成功）的用户生效
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
                     });
         }
 
@@ -385,16 +404,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                     .and()
                     .exceptionHandling()
-                    .authenticationEntryPoint((request, response, authException) -> { //认证入口点
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());
-                    })
+                    .authenticationEntryPoint(new Http401AuthenticationEntryPoint("JWT"))
                     .and()
                     .formLogin().loginProcessingUrl(appProperties.getSecurity().getSystemWeb().getLoginProcessingUrl()).permitAll()
                     .successHandler((request, response, authentication) -> { //认证成功
                         objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
                     })
                     .failureHandler((request, response, exception) -> { //认证失败
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getLocalizedMessage());
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getMessage());
                     })
                     .and()
                     .logout()
@@ -408,7 +425,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .exceptionHandling()
                     .accessDeniedHandler((request, response, accessDeniedException) -> { //AccessDeniedHandler只对已经通过认证的用户（也就是已经登陆成功）的用户生效
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
                     });
         }
     }
