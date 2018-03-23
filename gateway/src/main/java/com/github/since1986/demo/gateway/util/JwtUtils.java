@@ -7,15 +7,16 @@ import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class JwtUtils {
 
     public static Jwt genATestJwt() throws JsonProcessingException {
-        SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtPayload jwtPayload = new SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtPayload();
-        jwtPayload.setUsername("admin");
-        jwtPayload.setAuthorities(Arrays.asList("ROLE_ADMIN", "ROLE_USER"));
+        SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtPayload jwtPayload = SecurityConfig.PrivateWebSecurityConfigurationAdapter.JwtPayload
+                .newBuilder()
+                .withUsername("user")
+                .withAuthorities(Collections.singletonList("ROLE_USER"))
+                .build();
         return JwtHelper.encode(new ObjectMapper().writeValueAsString(jwtPayload), new MacSigner("123456"));
     }
 

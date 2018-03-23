@@ -222,12 +222,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .formLogin().loginProcessingUrl(appProperties.getSecurity().getPrivateWeb().getLoginProcessingUrl()).permitAll()
                     .successHandler((request, response, authentication) -> { //认证成功
-                        JwtPayload jwtPayload = new JwtPayload(); //认证成功后将Jwt放入response的header中
-                        jwtPayload.setUsername(authentication.getPrincipal().toString());
-                        jwtPayload.setAuthorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
-                        Jwt jwt = JwtHelper.encode(objectMapper.writeValueAsString(jwtPayload), jwtSigner());
+                        //认证成功后将Jwt放入response的header中
+                        Jwt jwt = JwtHelper.encode(
+                                objectMapper.writeValueAsString(
+                                        JwtPayload
+                                                .newBuilder()
+                                                .withUsername(authentication.getPrincipal().toString())
+                                                .withAuthorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                                                .build()
+                                ),
+                                jwtSigner()
+                        );
                         response.addHeader("WWW-Authenticate", String.format("Bearer %s", jwt.getEncoded()));
-                        objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
                     })
                     .failureHandler((request, response, exception) -> { //认证失败
                         response.setHeader("WWW-Authenticate", "JWT");
@@ -267,6 +273,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             private String username;
             private String userId;
             private List<String> authorities = new ArrayList<>(); //授权
+
+            //给Jackson用的默认构造器
+            public JwtPayload() {
+            }
+
+            private JwtPayload(Builder builder) {
+                setIss(builder.iss);
+                setSub(builder.sub);
+                setAud(builder.aud);
+                setExp(builder.exp);
+                setNbf(builder.nbf);
+                setIat(builder.iat);
+                setJti(builder.jti);
+                setUsername(builder.username);
+                setUserId(builder.userId);
+                setAuthorities(builder.authorities);
+            }
+
+            public static Builder newBuilder() {
+                return new Builder();
+            }
 
             public String getIss() {
                 return iss;
@@ -346,6 +373,76 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             public void setAuthorities(List<String> authorities) {
                 this.authorities = authorities;
+            }
+
+            public static final class Builder {
+                private String iss;
+                private String sub;
+                private String aud;
+                private long exp;
+                private long nbf;
+                private long iat;
+                private String jti;
+                private String username;
+                private String userId;
+                private List<String> authorities;
+
+                private Builder() {
+                }
+
+                public Builder withIss(String iss) {
+                    this.iss = iss;
+                    return this;
+                }
+
+                public Builder withSub(String sub) {
+                    this.sub = sub;
+                    return this;
+                }
+
+                public Builder withAud(String aud) {
+                    this.aud = aud;
+                    return this;
+                }
+
+                public Builder withExp(long exp) {
+                    this.exp = exp;
+                    return this;
+                }
+
+                public Builder withNbf(long nbf) {
+                    this.nbf = nbf;
+                    return this;
+                }
+
+                public Builder withIat(long iat) {
+                    this.iat = iat;
+                    return this;
+                }
+
+                public Builder withJti(String jti) {
+                    this.jti = jti;
+                    return this;
+                }
+
+                public Builder withUsername(String username) {
+                    this.username = username;
+                    return this;
+                }
+
+                public Builder withUserId(String userId) {
+                    this.userId = userId;
+                    return this;
+                }
+
+                public Builder withAuthorities(List<String> authorities) {
+                    this.authorities = authorities;
+                    return this;
+                }
+
+                public JwtPayload build() {
+                    return new JwtPayload(this);
+                }
             }
         }
     }
