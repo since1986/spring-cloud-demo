@@ -204,7 +204,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         public boolean containsContext(HttpServletRequest request) {
                             //TODO JWT 过期检查
                             String jwtHeader = request.getHeader("Authorization");
-                            return StringUtils.isNoneEmpty(jwtHeader) && StringUtils.startsWith(jwtHeader, "Bearer ");
+                            return StringUtils.isNoneEmpty(jwtHeader) && StringUtils.startsWith(jwtHeader, "Bearer ") && StringUtils.isNoneBlank(jwtHeader.replaceFirst("Bearer ", ""));
                         }
                     });
             http
