@@ -25,3 +25,5 @@ nbdist/
 
 ### JRebel ###
 rebel.xml
+
+*zookeeper.out

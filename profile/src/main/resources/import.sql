@@ -1,3 +1,6 @@
+drop schema if exists `profile`;
+create schema `profile`;
+
 USE `profile`;
 
 DROP TABLE IF EXISTS `profile`;
@@ -13,7 +16,7 @@ CREATE TABLE `profile` (
   PRIMARY KEY (`id`)
 );
 
-INSERT INTO `profile` (`id`, `_name`, `username`, `user_id`, `gender`, `birthday`, `email`, `phone`) VALUES (1, '阿达敏', 'admin', 1, 'M', '2018-1-10', '385741668@qq.com', '12000000000');
+INSERT INTO `profile` (`id`, `_name`, `username`, `user_id`, `gender`, `birthday`, `email`, `phone`) VALUES (1, 'ADMIN', 'admin', 1, 'M', '2018-1-10', '385741668@qq.com', '12000000000');
 
 drop table if exists `events`;
 create table `events` (

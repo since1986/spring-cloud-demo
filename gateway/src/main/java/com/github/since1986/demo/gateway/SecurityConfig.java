@@ -234,6 +234,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 jwtSigner()
                         );
                         response.addHeader("WWW-Authenticate", String.format("Bearer %s", jwt.getEncoded()));
+                        objectMapper.writeValue(response.getWriter(), authentication.getPrincipal());
                     })
                     .failureHandler((request, response, exception) -> { //认证失败
                         response.setHeader("WWW-Authenticate", "JWT");

@@ -1,3 +1,6 @@
+drop schema if exists `gateway`;
+create schema `gateway`;
+
 USE `gateway`;
 
 DROP TABLE IF EXISTS `users`;
