@@ -45,10 +45,12 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void save(String email, String phone) {
+    public void save(String username, Long userId, String email, String phone) {
         save(
                 Profile
                         .newBuilder()
+                        .withUsername(username)
+                        .withUserId(userId)
                         .withEmail(email)
                         .withPhone(phone)
                         .withId(idGenerator.nextId())

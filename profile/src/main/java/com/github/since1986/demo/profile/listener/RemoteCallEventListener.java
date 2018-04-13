@@ -1,5 +1,6 @@
 package com.github.since1986.demo.profile.listener;
 
+import com.github.since1986.demo.profile.model.RemoteCallEvent;
 import com.github.since1986.demo.profile.service.RemoteCallEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class RemoteCallEventListener {
     }
 
     @KafkaListener(topics = "PROFILE_SERVICE")
-    public void listen(String payload) throws IOException {
+    public void listen(RemoteCallEvent payload) throws IOException {
         LOGGER.debug("event received: " + payload);
         remoteCallEventService.save(payload);
     }

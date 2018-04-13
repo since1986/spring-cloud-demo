@@ -21,12 +21,12 @@ import java.util.List;
 public class RemoteCallEventServiceImpl implements RemoteCallEventService {
 
     private final ObjectMapper objectMapper;
-    private final KafkaTemplate kafkaTemplate;
+    private final KafkaTemplate<String, RemoteCallEvent> kafkaTemplate;
     private final RemoteCallEventMapper remoteCallEventMapper;
     private Logger LOGGER = LoggerFactory.getLogger(RemoteCallEventServiceImpl.class);
 
     @Autowired
-    public RemoteCallEventServiceImpl(RemoteCallEventMapper remoteCallEventMapper, KafkaTemplate kafkaTemplate, ObjectMapper objectMapper) {
+    public RemoteCallEventServiceImpl(RemoteCallEventMapper remoteCallEventMapper, KafkaTemplate<String, RemoteCallEvent> kafkaTemplate, ObjectMapper objectMapper) {
         this.remoteCallEventMapper = remoteCallEventMapper;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
@@ -41,12 +41,12 @@ public class RemoteCallEventServiceImpl implements RemoteCallEventService {
     public void publish() throws JsonProcessingException {
         List<RemoteCallEvent> events = remoteCallEventMapper.findByStatus(RemoteCallEvent.Status.CREATED);
         for (RemoteCallEvent event : events) {
-            String data = objectMapper.writeValueAsString(event);
-            LOGGER.debug(data);
-            ListenableFuture<SendResult> sendResultListenableFuture =
+//            String data = objectMapper.writeValueAsString(event);
+//            LOGGER.debug(data);
+            ListenableFuture<SendResult<String, RemoteCallEvent>> sendResultListenableFuture =
                     kafkaTemplate.send(
                             "PROFILE_SERVICE",
-                            data
+                            event
                     ); //TODO 现在topic是写死的，考虑做成动态的
             sendResultListenableFuture.addCallback(
                     result -> {

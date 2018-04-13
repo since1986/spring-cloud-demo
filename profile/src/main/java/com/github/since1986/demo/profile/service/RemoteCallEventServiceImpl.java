@@ -56,6 +56,12 @@ public class RemoteCallEventServiceImpl implements RemoteCallEventService, Appli
     }
 
     @Override
+    public void save(RemoteCallEvent remoteCallEvent) {
+        remoteCallEvent.setStatus(RemoteCallEvent.Status.RECEIVED);
+        remoteCallEventMapper.save(remoteCallEvent);
+    }
+
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }

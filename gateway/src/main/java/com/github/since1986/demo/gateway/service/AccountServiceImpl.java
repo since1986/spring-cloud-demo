@@ -22,15 +22,15 @@ public class AccountServiceImpl implements AccountService {
 
     private final IdGenerator idGenerator;
 
-    private final ProfileService profileService;
+    private final ProfileTransfulService profileTransfulService;
 
     @Autowired
-    public AccountServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, IdGenerator idGenerator, AuthorityMapper authorityMapper, ProfileService profileService) {
+    public AccountServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, IdGenerator idGenerator, AuthorityMapper authorityMapper, ProfileTransfulService profileTransfulService) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.idGenerator = idGenerator;
         this.authorityMapper = authorityMapper;
-        this.profileService = profileService;
+        this.profileTransfulService = profileTransfulService;
     }
 
     @Override
@@ -54,6 +54,6 @@ public class AccountServiceImpl implements AccountService {
                         .withUsername(username)
                         .build()
         );
-        profileService.save(email, phone);
+        profileTransfulService.save(username, newUserId, email, phone);
     }
 }

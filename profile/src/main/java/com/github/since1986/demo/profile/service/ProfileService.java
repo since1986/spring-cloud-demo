@@ -8,5 +8,5 @@ public interface ProfileService {
 
     void save(Profile profile);
 
-    void save(String email, String phone);
+    void save(String username, Long userId, String email, String phone);
 }

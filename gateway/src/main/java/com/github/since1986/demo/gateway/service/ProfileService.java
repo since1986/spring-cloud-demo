@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("comgithubsince1986demoprofile")
 public interface ProfileService {
 
-    @RequestMapping(method = RequestMethod.POST, value = "/profile")
-    void save(@RequestParam("email") String email, @RequestParam("phone") String phone);
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/profile/{username}")
     Profile get(@PathVariable("username") String username);

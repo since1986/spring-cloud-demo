@@ -13,21 +13,18 @@ import java.util.List;
 
 @Transactional
 @Service
-public abstract class ProfileServiceImpl implements ProfileService {
+public class ProfileTransfulServiceImpl implements ProfileTransfulService {
 
-    private Logger LOGGER = LoggerFactory.getLogger(ProfileServiceImpl.class);
-
-    private final RemoteCallEventService remoteCallEventService;
-    private final IdGenerator idGenerator;
+    private Logger LOGGER = LoggerFactory.getLogger(ProfileTransfulServiceImpl.class);
 
     @Autowired
-    public ProfileServiceImpl(RemoteCallEventService remoteCallEventService, IdGenerator idGenerator) {
-        this.remoteCallEventService = remoteCallEventService;
-        this.idGenerator = idGenerator;
-    }
+    private RemoteCallEventService remoteCallEventService;
+
+    @Autowired
+    private IdGenerator idGenerator;
 
     @Override
-    public void save(String email, String phone) { //TODO 可以用写一个"接口定义契约，实现由动态代理+注解自动生成"的这种方式通用化(参考Feign或@Transactional的实现方式)
+    public void save(String username, Long userId, String email, String phone) {
         //TODO
         //可以这样处理：
         //第一种方式：
@@ -42,9 +39,13 @@ public abstract class ProfileServiceImpl implements ProfileService {
         //3.想办法与Feign整合在一起，以支持内置的注册发现、负载均衡等功能，并且最重要的是实现编程模型的统一
         //4.底层的编程式调用接口可以参考Retrofit的设计方式
         List<Class> remoteServiceMethodParamTypes = new ArrayList<>();
+        remoteServiceMethodParamTypes.add(username.getClass());
+        remoteServiceMethodParamTypes.add(userId.getClass());
         remoteServiceMethodParamTypes.add(email.getClass());
         remoteServiceMethodParamTypes.add(phone.getClass());
-        List<String> remoteServiceMethodParamValues = new ArrayList<>();
+        List<Object> remoteServiceMethodParamValues = new ArrayList<>();
+        remoteServiceMethodParamValues.add(username);
+        remoteServiceMethodParamValues.add(userId);
         remoteServiceMethodParamValues.add(email);
         remoteServiceMethodParamValues.add(phone);
         remoteCallEventService.save(
