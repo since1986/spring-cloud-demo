@@ -25,6 +25,6 @@ public class RemoteCallEventListener {
     @KafkaListener(topics = "PROFILE_SERVICE")
     public void listen(RemoteCallEvent payload) throws IOException {
         LOGGER.debug("event received: " + payload);
-        remoteCallEventService.save(payload);
+        remoteCallEventService.save(payload); //FIXME kafka多个节点同时消费造成也无所谓重复
     }
 }

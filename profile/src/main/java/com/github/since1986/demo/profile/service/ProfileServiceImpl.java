@@ -41,7 +41,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public void save(Profile profile) {
-        profileMapper.save(profile);
+        if (get(profile.getUsername()) == null) {
+            profileMapper.save(profile);
+        }
     }
 
     @Override
